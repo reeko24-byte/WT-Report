@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>WT Surveillance</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#00497D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WT Surveillance">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ── 1. Who is walking ──────────────────────────────────────────────────
+     The team first, then the reporter, then whoever is with them. The order
+     is the order the report prints them in, and the order the brief asks for.
+-->
+<section id="screen-team" class="screen">
+  <div class="pad">
+    <h1 class="brand">Walkthrough Surveillance</h1>
+    <p class="sub">Laporan Team WT — foto, caption WhatsApp, dan Excel. Bekerja tanpa sinyal.</p>
+
+    <div class="field">
+      <span>Team</span>
+      <div id="t-team" class="chips wrap"></div>
+    </div>
+
+    <label class="field">
+      <span>Nama Anda</span>
+      <select id="t-reporter"></select>
+    </label>
+    <p class="hint">Baris pertama laporan, dan nama pada file Excel.</p>
+
+    <div class="field">
+      <span id="t-mates-label">Anggota lain</span>
+      <!-- Tick boxes, not a dropdown: the crew is picked once in the morning
+           and the whole roster has to be visible while choosing. -->
+      <div id="t-mates" class="picklist"></div>
+    </div>
+
+    <button id="t-continue" class="primary" disabled>Lanjut</button>
+    <p id="t-blocker" class="hint"></p>
+  </div>
+</section>
+
+<!-- ── 2. Where they are walking ──────────────────────────────────────────
+     Zone then segment, the way the Android app asks it. Size Pipe fills in
+     from the segment and stays editable, because the pipe is a fact about the
+     segment and the crew are the ones who can see it.
+-->
+<section id="screen-area" class="screen">
+  <header class="bar">
+    <button id="a-back" class="link">Kembali</button>
+    <span class="who">Penugasan</span>
+  </header>
+  <div class="pad">
+    <div class="field">
+      <span>Loc</span>
+      <div id="a-zone" class="chips wrap"></div>
+    </div>
+
+    <label class="field">
+      <span>Segment</span>
+      <select id="a-segment"></select>
+    </label>
+
+    <label class="field">
+      <span>Size Pipe (inch)</span>
+      <input id="a-size" type="text" inputmode="decimal" placeholder="8" enterkeyhint="done">
+    </label>
+    <p id="a-size-hint" class="hint"></p>
+
+    <button id="a-continue" class="primary" disabled>Mulai Survey</button>
+    <p id="a-blocker" class="hint"></p>
+  </div>
+</section>
+
+<!-- ── 3. The walk itself ─────────────────────────────────────────────── -->
+<section id="screen-form" class="screen">
+  <header class="bar">
+    <span id="crew-label" class="who"></span>
+    <button id="change-team" class="link">Ganti</button>
+  </header>
+
+  <div class="pad">
+    <!-- Standing summary of the assignment. It is on every screen the operator
+         works from because a segment picked at 06:00 and still showing at 14:00
+         is the single most expensive thing to get wrong here. -->
+    <div class="assignment">
+      <div id="assign-line" class="assign-line"></div>
+      <button id="change-area" class="link">Ubah</button>
+    </div>
+
+    <div class="row-between counter">
+      <span id="today-count"></span>
+      <button id="view-list" class="link">Lihat</button>
+    </div>
+
+    <!-- GPS does not gate the camera. The KP is what the report is written in;
+         the coordinates corroborate it, and a walk should not stop because a
+         fix is slow under canopy. -->
+    <div id="gps" class="gps waiting">
+      <div class="gps-line" id="gps-status"></div>
+      <div class="gps-line small" id="gps-detail"></div>
+    </div>
+
+    <label class="field">
+      <span>KP</span>
+      <input id="f-kp" type="text" inputmode="numeric" pattern="[0-9+]*"
+             placeholder="26+000" maxlength="6" enterkeyhint="next" aria-label="KP">
+    </label>
+    <p id="kp-hint" class="hint">Ketik angkanya saja — tanda + muncul sendiri.</p>
+
+    <div class="field">
+      <span>Note</span>
+      <div id="f-condition" class="chips wrap"></div>
+    </div>
+
+    <!-- Only revealed by "Lainnya". The canned sentence is shown read-only for
+         the other choice, so what will be sent is never a guess. -->
+    <label class="field hidden" id="other-field">
+      <span>Kondisi lain</span>
+      <textarea id="f-other" rows="3"
+                placeholder="mis. Ditemukan galian pihak ketiga di atas ROW"></textarea>
+    </label>
+    <p id="note-preview" class="note-preview"></p>
+
+    <div class="field">
+      <span id="photos-label"></span>
+      <div id="photo-strip" class="strip"></div>
+      <!-- The stamp is burned into the pixels at capture time. If a field has
+           changed since, the photo still shows the old value and nothing can
+           fix it but taking another. -->
+      <p id="photo-warn" class="warn hidden"></p>
+    </div>
+
+    <div class="two-up">
+      <button id="take-photo" class="secondary">Ambil Foto</button>
+      <button id="pick-gallery" class="secondary">Dari Galeri</button>
+    </div>
+    <p id="photo-blocker" class="hint"></p>
+
+    <!-- The phone's own camera. Far more reliable inside a home-screen web app
+         than getUserMedia, and it gives the full-quality capture. -->
+    <input id="camera-input" type="file" accept="image/*" capture="environment" hidden>
+    <!-- No `capture`, so the picker offers the library. Multiple, because
+         picking the three shots of one point in one go is how a gallery is
+         actually used. -->
+    <input id="gallery-input" type="file" accept="image/*" multiple hidden>
+
+    <button id="save-point" class="primary" disabled>Simpan &amp; Kirim</button>
+    <p id="save-blocker" class="hint"></p>
+
+    <button id="go-export" class="secondary">Export ke Excel</button>
+
+    <!-- Which version this phone is actually running. Read from the live cache
+         rather than a constant, so it cannot claim to be newer than it is. -->
+    <p id="app-version" class="version"></p>
+  </div>
+</section>
+
+<!-- ── 4. Send one point to WhatsApp ──────────────────────────────────── -->
+<section id="screen-send" class="screen">
+  <header class="bar">
+    <button id="send-back" class="link">Kembali</button>
+    <span class="who">Kirim ke WhatsApp</span>
+  </header>
+  <div class="pad">
+    <div id="send-photos" class="strip"></div>
+    <!-- The report, exactly as it will be sent. Shown because it is the
+         deliverable — an operator should see it before it goes to the group,
+         not after. -->
+    <pre id="send-caption" class="caption"></pre>
+
+    <button id="send-share" class="primary">Kirim ke WhatsApp</button>
+    <button id="send-copy" class="secondary">Salin Caption</button>
+    <p id="send-note" class="hint"></p>
+
+    <button id="send-next" class="secondary">KP Berikutnya</button>
+
+    <p id="send-status" class="status"></p>
+    <!-- Only appears after a failure, so an operator can report what the phone
+         actually is without digging through Settings. -->
+    <p id="send-env" class="hint hidden"></p>
+  </div>
+</section>
+
+<!-- ── 5. Recorded points ─────────────────────────────────────────────── -->
+<section id="screen-list" class="screen">
+  <header class="bar">
+    <button id="list-back" class="link">Kembali</button>
+    <span class="who" id="list-title"></span>
+  </header>
+  <div class="pad">
+    <div id="list-body" class="list"></div>
+  </div>
+</section>
+
+<!-- ── 6. Excel export ────────────────────────────────────────────────── -->
+<section id="screen-export" class="screen">
+  <header class="bar">
+    <button id="export-back" class="link">Kembali</button>
+    <span class="who">Export Excel</span>
+  </header>
+  <div class="pad">
+    <p id="export-summary" class="lead"></p>
+    <!-- Photos are stored uncompressed in the zip, so the finished size is
+         known before anything is built. Worth saying up front: the wait and
+         whether WhatsApp will take it both follow from this number. -->
+    <p id="export-size" class="hint"></p>
+    <p id="export-warn" class="warn hidden"></p>
+    <!-- Points already in a spreadsheet are left out of the next one, so a
+         second export does not repeat the first. This puts them back in. -->
+    <button id="export-include" class="link hidden"></button>
+
+    <button id="export-build" class="primary">Buat File Excel</button>
+
+    <!-- Sharing must be its own tap. iOS withdraws a page's permission to open
+         the share sheet if the handler waits on anything first, so the file is
+         built on one tap and handed over on the next. -->
+    <div id="export-ready" class="hidden">
+      <p id="export-filename" class="filename"></p>
+      <!-- Order and emphasis are set at runtime. On Android, Chrome refuses to
+           share a spreadsheet at all, so the download becomes the primary
+           action rather than the consolation prize. -->
+      <button id="export-share" class="primary">Kirim File ke WhatsApp</button>
+      <button id="export-download" class="secondary">Simpan ke Files</button>
+      <p id="export-route" class="hint"></p>
+      <button id="export-clear" class="danger-link">Hapus data yang sudah diexport</button>
+    </div>
+
+    <p id="export-status" class="status"></p>
+    <p id="export-env" class="hint hidden"></p>
+  </div>
+</section>
+
+<div id="toast" class="toast"></div>
+
+<script src="js/options.js"></script>
+<script src="js/exif.js"></script>
+<script src="js/seal.js"></script>
+<script src="js/caption.js"></script>
+<script src="js/db.js"></script>
+<script src="js/geo.js"></script>
+<script src="js/photo.js"></script>
+<script src="js/xlsx.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
