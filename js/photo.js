@@ -39,10 +39,15 @@
   /* -- The two numbers that decide how the logo watermark sits ---------- */
 
   /* How much of the frame the mark spans, and how far through it you can see.
-     0.38 is faint enough to read a fence line through and solid enough to
-     survive WhatsApp's re-compression. These are the only place either is
-     decided -- change them here. */
-  var WATERMARK_OPACITY = 0.38;
+     These are the only place either is decided -- change them here.
+
+     0.55, raised from 0.38. The first value was judged against grass and sky,
+     where the mark's white glyphs sat on their own dark shadow and read easily.
+     On a photograph of a printed page it all but disappeared: pale ground, white
+     text, and only a faint shadow left to carry it. The artwork now carries a
+     hard dark outline too, and the opacity is set for the harder case -- a mark
+     that cannot be read on a document photograph is not identifying anything. */
+  var WATERMARK_OPACITY = 0.55;
   var WATERMARK_WIDTH_FRACTION = 0.30;
   var WATERMARK_SOURCE = 'assets/watermark.png';
 
@@ -434,10 +439,14 @@
     bandLines: function (meta) {
       var team = (meta.team || []).filter(function (name) { return name; });
 
+      /* Asked as text, not tested for null: a size is a list now, and an empty
+         list is not null -- it would have appended a dangling separator. */
+      var size = WT.sizeText(meta.pipeSize);
+
       var lines = [
         'LAPORAN TEAM WT · ' + (meta.zone || ''),
         'Segment ' + WT.segmentText(meta.segment, meta.segmentName) +
-          (meta.pipeSize == null ? '' : ' · ' + WT.sizeText(meta.pipeSize)),
+          (size ? ' · ' + size : ''),
         WT.kpText(meta.kp),
         /* Generous, because the band wraps rather than shrinks. The cap is only
            there so that a note typed at length cannot push the band to its

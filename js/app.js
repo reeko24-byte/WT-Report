@@ -21,7 +21,7 @@
 
   var state = {
     crew: { team: '', reporter: '', mates: [] },
-    area: { zone: '', segment: '', size: '' },
+    area: { zone: '', segment: '', size: '', kpFrom: '', kpTo: '' },
     /* Once Size Pipe has been typed by hand it stops following the segment. A
        crew standing in front of the pipe can read its diameter; the table can
        only remember what it was told. */
@@ -273,6 +273,17 @@
     var team = WT.teamById(state.crew.team);
     var full = state.crew.mates.length >= WT.OPTIONS.MAX_TEAM_MATES;
 
+    /* The reporter is already on the report; ticking them twice would print
+       their name twice. Dropped here rather than inside the loop so that a
+       section left with nobody in it gets no heading either — the South crew is
+       one person, and when that person is the reporter a bare heading over an
+       empty gap reads as a list that failed to load. */
+    function others(people) {
+      return people.filter(function (person) {
+        return person.name !== state.crew.reporter;
+      });
+    }
+
     function heading(text) {
       var head = document.createElement('div');
       head.className = 'pick-head';
@@ -282,10 +293,6 @@
 
     function rows(people) {
       people.forEach(function (person) {
-        // The reporter is already on the report; ticking them twice would print
-        // their name twice.
-        if (person.name === state.crew.reporter) return;
-
         var picked = state.crew.mates.indexOf(person.name) !== -1;
         var row = document.createElement('button');
         row.type = 'button';
@@ -324,11 +331,16 @@
       });
     }
 
-    heading(team ? team.label : 'Team');
-    rows(split.mine);
-    if (split.rest.length) {
+    var mine = others(split.mine);
+    var rest = others(split.rest);
+
+    if (mine.length) {
+      heading(team ? team.label : 'Team');
+      rows(mine);
+    }
+    if (rest.length) {
       heading('Roster lain');
-      rows(split.rest);
+      rows(rest);
     }
   }
 
@@ -353,10 +365,7 @@
   }
 
   /** Every name on the report, reporter first. */
-  function crewNames() {
-    return [state.crew.reporter].concat(state.crew.mates)
-      .filter(function (name) { return name; });
-  }
+  function crewNames() { return WT.teamNames(state.crew); }
 
   /* ── 2. Assignment ──────────────────────────────────────────────────── */
 
@@ -381,6 +390,10 @@
     if (!segment || segment.zone !== zone) {
       state.area.segment = '';
       state.area.size = '';
+      // The stretch belongs to the segment it was set for. Carried across, it
+      // would name real KPs on a line nobody is walking.
+      state.area.kpFrom = '';
+      state.area.kpTo = '';
       state.sizeTouched = false;
     }
   }
@@ -403,17 +416,65 @@
     });
     select.value = state.area.segment;
 
+    $('a-kp-from').value = state.area.kpFrom;
+    $('a-kp-to').value = state.area.kpTo;
+    $('a-whole').disabled = !WT.segmentEndKp(state.area.segment);
+    renderRangeHint();
+
     $('a-size').value = state.area.size;
     renderSizeHint();
 
-    var ready = !!(state.area.zone && state.area.segment &&
-      WT.parseNumber(state.area.size) > 0);
+    var rangeSet = WT.isKpComplete(state.area.kpFrom) &&
+      WT.isKpComplete(state.area.kpTo);
+    var ready = !!(state.area.zone && state.area.segment && rangeSet &&
+      WT.parseSizes(state.area.size).length > 0);
     $('a-continue').disabled = !ready;
     $('a-blocker').textContent = ready ? ''
-      : !state.area.zone ? 'Pilih Loc dulu.'
+      : !state.area.zone ? 'Pilih Location dulu.'
       : !state.area.segment ? 'Pilih segment.'
+      : !rangeSet ? 'Isi Penugasan — KP awal dan KP akhir.'
       : 'Isi Size Pipe.';
   }
+
+  function renderRangeHint() {
+    var end = WT.segmentEndKp(state.area.segment);
+    var hint = $('a-range-hint');
+
+    if (!state.area.segment) { hint.textContent = ''; return; }
+    if (!end) {
+      hint.textContent = 'Isi KP awal dan KP akhir yang ditugaskan hari ini.';
+      return;
+    }
+    hint.textContent = 'Segment ' + state.area.segment + ' sepanjang ' +
+      WT.kpPrint(end) + '. Isi bagian yang ditugaskan hari ini, atau tekan ' +
+      'Seluruh segment.';
+  }
+
+  /* The "+" is inserted as you type, so the caret has to be forced back to the
+     end — otherwise typing 0,0,0,0,0 gives 00+000 only by luck, and 1,0,0,0,0
+     gives 10+000 while 0,7,6,0,0 gives 07+006 rather than 07+600. */
+  function wireAssignedKp(inputId, key) {
+    $(inputId).addEventListener('input', function () {
+      var formatted = WT.formatKp(this.value);
+      this.value = formatted;
+      this.setSelectionRange(formatted.length, formatted.length);
+      state.area[key] = formatted;
+      renderArea();
+    });
+  }
+  wireAssignedKp('a-kp-from', 'kpFrom');
+  wireAssignedKp('a-kp-to', 'kpTo');
+
+  /* The whole segment, from its start to its as-built end. By far the commonest
+     assignment, and typing five digits twice for it is five digits twice too
+     many. */
+  $('a-whole').addEventListener('click', function () {
+    var end = WT.segmentEndKp(state.area.segment);
+    if (!end) return;
+    state.area.kpFrom = '00+000';
+    state.area.kpTo = end;
+    renderArea();
+  });
 
   function renderSizeHint() {
     var segment = WT.segmentById(state.area.segment);
@@ -431,7 +492,7 @@
     // A hand-typed size belongs to the segment it was typed for, so picking a
     // different one hands the field back to the table.
     state.sizeTouched = false;
-    state.area.size = segment ? String(segment.size) : '';
+    state.area.size = segment ? WT.sizeInputText(segment.size) : '';
     renderArea();
   });
 
@@ -442,7 +503,7 @@
     state.sizeTouched = !!this.value.trim();
     if (!state.sizeTouched) {
       var segment = WT.segmentById(state.area.segment);
-      state.area.size = segment ? String(segment.size) : '';
+      state.area.size = segment ? WT.sizeInputText(segment.size) : '';
       this.value = state.area.size;
     }
     renderArea();
@@ -469,13 +530,15 @@
     line.textContent = (state.area.zone || '—') + ' · Segment ' +
       (segment ? WT.segmentText(segment.id, segment.name) : '—');
 
+    var stretch = WT.kpRangeText(state.area.kpFrom, state.area.kpTo);
     var detail = document.createElement('small');
-    detail.textContent = 'Size Pipe ' + WT.sizeText(pipeSize()) +
+    detail.textContent = (stretch ? stretch + ' · ' : '') +
+      'Size Pipe ' + WT.sizeText(pipeSize()) +
       ' · Tim: ' + crewNames().join(', ');
     line.appendChild(detail);
   }
 
-  function pipeSize() { return WT.parseNumber(state.area.size); }
+  function pipeSize() { return WT.parseSizes(state.area.size); }
 
   function segmentName() {
     var segment = WT.segmentById(state.area.segment);
@@ -599,9 +662,31 @@
           WT.OPTIONS.MIN_PHOTOS + ').'
       : '';
 
+    renderOutsideWarning();
+
     // Editing a field after the photos were taken is exactly when this needs to
     // be noticed, so it is checked here rather than only on capture.
     renderStaleWarning();
+  }
+
+  /**
+   * Says when a KP falls outside the stretch the crew was assigned.
+   *
+   * A flag, never a refusal. The commonest cause is a typo — a KP two segments
+   * long, entered a digit out — and catching those at the moment of typing is
+   * most of the value. But the crew are the ones standing on the line: an
+   * assignment gets extended, a crew gets waved onto the next stretch, and an
+   * app that refused the record would simply lose it.
+   */
+  function renderOutsideWarning() {
+    var warning = $('kp-outside');
+    var inside = WT.kpWithin(state.form.kp, state.area.kpFrom, state.area.kpTo);
+
+    warning.textContent = inside ? '' :
+      'KP ini di luar penugasan (' +
+      WT.kpRangeText(state.area.kpFrom, state.area.kpTo) +
+      '). Tetap bisa disimpan — periksa dulu apakah salah ketik.';
+    warning.classList.toggle('hidden', inside);
   }
 
   /* ── GPS ────────────────────────────────────────────────────────────── */
@@ -637,7 +722,7 @@
    * operator would otherwise have no way of knowing.
    */
   function overlaySignature() {
-    return [state.area.zone, state.area.segment, pipeSize(), state.form.kp,
+    return [state.area.zone, state.area.segment, WT.sizeText(pipeSize()), state.form.kp,
             conditionStampText(), crewNames().join('+')].join('|');
   }
 
@@ -896,6 +981,12 @@
       segment: state.area.segment,
       segmentName: segmentName(),
       pipeSize: pipeSize(),
+      /* The stretch this crew was sent to walk, stored on every record rather
+         than once for the day. A day can carry two assignments, and the office
+         checking coverage needs to know which stretch each KP belongs to — not
+         which one happened to be on screen when the file was exported. */
+      assignFrom: state.area.kpFrom,
+      assignTo: state.area.kpTo,
 
       kp: state.form.kp,
       conditionLabel: state.form.condition,
@@ -1567,7 +1658,9 @@
         state.area = {
           zone: area.zone || '',
           segment: area.segment,
-          size: area.size || ''
+          size: area.size || '',
+          kpFrom: area.kpFrom || '',
+          kpTo: area.kpTo || ''
         };
       }
 
@@ -1583,7 +1676,11 @@
          yesterday and are almost always still true, so a returning phone opens
          straight on the survey screen rather than making the crew re-answer two
          screens before their first KP. */
-      if (state.crew.reporter && state.area.segment) {
+      /* The assignment is only complete with its stretch, so a phone carrying an
+         older one — saved before the stretch existed — stops on the assignment
+         screen rather than opening on a survey it cannot describe. */
+      if (state.crew.reporter && state.area.segment &&
+          WT.isKpComplete(state.area.kpFrom) && WT.isKpComplete(state.area.kpTo)) {
         show('form');
         refreshCount();
       } else if (state.crew.reporter) {

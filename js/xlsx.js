@@ -7,12 +7,17 @@
  *
  * The column layout must not drift:
  *
- *   A Tanggal        B Waktu        C Loc          D Segment    E Nama Segment
- *   F KP             G Size Pipe    H Kondisi      I Note       J Tim
- *   K Pelapor        L M N Photo 1-3
- *   O..R  Waktu / Kode / Lat / Long for photo 1
- *   S..V  the same for photo 2
- *   W..Z  the same for photo 3
+ *   A Tanggal        B Waktu           C Location        D Segment
+ *   E Nama Segment   F KP              G Penugasan From  H Penugasan To
+ *   I Size Pipe      J Kondisi         K Note            L Tim
+ *   M Pelapor        N O P Photo 1-3
+ *   Q..T   Waktu / Kode / Lat / Long for photo 1
+ *   U..X   the same for photo 2
+ *   Y..AB  the same for photo 3
+ *
+ * PENUGASAN IS SPLIT ACROSS TWO COLUMNS, the way ROWPowerline splits its
+ * location range: the office sorts and filters on the ends of a stretch
+ * separately, and a single "00 +000 - 12 +820" cell can do neither.
  *
  * FOUR COLUMNS PER PHOTOGRAPH, not one set per row. Three shots of one point
  * are taken minutes and tens of metres apart, and a picture chosen from the
@@ -26,10 +31,13 @@
  * beside it is the time the app wrote. A picture whose printed time disagrees
  * with its row was edited after it left the phone.
  *
- * Size Pipe and the coordinates are written as NUMBERS on Excel's General
- * format, so they sort and filter, and so Format Cells reads "General" rather
- * than "Custom" -- which is where anyone looking for a plain number expects to
- * find it.
+ * The coordinates are written as NUMBERS on Excel's General format, so they sort
+ * and filter, and so Format Cells reads "General" rather than "Custom" -- which
+ * is where anyone looking for a plain number expects to find it.
+ *
+ * Size Pipe is TEXT, and used not to be. Segment 10/12 runs a 24" and a 20" down
+ * one right-of-way, and no number holds two diameters. A filter still groups the
+ * sheet by pipe, which is the only thing that column was ever used for.
  */
 
 (function (WT) {
@@ -64,8 +72,9 @@
     ((PHOTO_WIDTH_CM + 0.15) / 2.54 * 96 - 5) / 7 * 10) / 10;       // 27.1
 
   var HEADERS = [
-    'Tanggal', 'Waktu', 'Loc', 'Segment', 'Nama Segment',
-    'KP', 'Size Pipe', 'Kondisi', 'Note', 'Tim', 'Pelapor',
+    'Tanggal', 'Waktu', 'Location', 'Segment', 'Nama Segment', 'KP',
+    'Penugasan From', 'Penugasan To',
+    'Size Pipe', 'Kondisi', 'Note', 'Tim', 'Pelapor',
     'Photo 1', 'Photo 2', 'Photo 3',
     'Waktu Foto 1', 'Kode Foto 1', 'Lat 1', 'Long 1',
     'Waktu Foto 2', 'Kode Foto 2', 'Lat 2', 'Long 2',
@@ -74,14 +83,14 @@
 
   /* 0-based. The three picture columns, then the first of the four-column
      blocks that follow one per photograph. */
-  var FIRST_PHOTO_COLUMN = 11;
-  var FIRST_META_COLUMN = 14;
+  var FIRST_PHOTO_COLUMN = 13;
+  var FIRST_META_COLUMN = 16;
   var META_STRIDE = 4;
 
   var STYLE_TEXT = 2, STYLE_CENTER = 3, STYLE_NUMBER = 4;
 
   var COLUMN_WIDTHS = [
-    12, 10, 12, 10, 20, 11, 10, 24, 46, 34, 20,
+    12, 10, 12, 10, 20, 11, 15, 15, 13, 24, 46, 34, 20,
     PHOTO_COLUMN_WIDTH, PHOTO_COLUMN_WIDTH, PHOTO_COLUMN_WIDTH,
     19, 17, 12, 12,
     19, 17, 12, 12,
@@ -91,16 +100,18 @@
   var COLUMN_STYLES = [
     STYLE_CENTER,   // A Tanggal
     STYLE_CENTER,   // B Waktu
-    STYLE_CENTER,   // C Loc
+    STYLE_CENTER,   // C Location
     STYLE_CENTER,   // D Segment -- an identifier, reads better centred
     STYLE_TEXT,     // E Nama Segment
     STYLE_CENTER,   // F KP
-    STYLE_NUMBER,   // G Size Pipe
-    STYLE_TEXT,     // H Kondisi
-    STYLE_TEXT,     // I Note
-    STYLE_TEXT,     // J Tim
-    STYLE_TEXT,     // K Pelapor
-    STYLE_TEXT, STYLE_TEXT, STYLE_TEXT,                 // L M N pictures
+    STYLE_CENTER,   // G Penugasan From
+    STYLE_CENTER,   // H Penugasan To
+    STYLE_CENTER,   // I Size Pipe -- text: 10/12 carries two diameters
+    STYLE_TEXT,     // J Kondisi
+    STYLE_TEXT,     // K Note
+    STYLE_TEXT,     // L Tim
+    STYLE_TEXT,     // M Pelapor
+    STYLE_TEXT, STYLE_TEXT, STYLE_TEXT,                 // N O P pictures
     STYLE_CENTER, STYLE_CENTER, STYLE_NUMBER, STYLE_NUMBER,
     STYLE_CENTER, STYLE_CENTER, STYLE_NUMBER, STYLE_NUMBER,
     STYLE_CENTER, STYLE_CENTER, STYLE_NUMBER, STYLE_NUMBER
@@ -493,11 +504,25 @@
           record.zone || '',
           record.segment || '',
           record.segmentName || '',
-          record.kp || '',
-          record.pipeSize,
+          WT.kpPrint(record.kp),
+          // The two ends of the assigned stretch, each in its own column.
+          WT.kpPrint(record.assignFrom),
+          WT.kpPrint(record.assignTo),
+          /* Written as TEXT -- '8"', or '24" & 20"' for segment 10/12, which
+             runs two pipes down one right-of-way. It was a number until that
+             segment was merged back into one, and no number can hold two
+             diameters. Nothing is lost: a filter still groups the sheet by pipe,
+             and summing diameters was never a thing anyone would do. */
+          WT.sizeText(record.pipeSize),
           record.conditionLabel || '',
           record.note || '',
-          (record.mates || []).join(', '),
+          /* THE WHOLE CREW, reporter included -- the same names, in the same
+             order, as the ticks on the WhatsApp report. This column used to
+             hold the crew minus the reporter, on the reasoning that Pelapor
+             named them already; but nobody reads two columns to count a team,
+             and a two-man walk read as one man. Pelapor stays, because who
+             filed the report is a separate question from who walked. */
+          WT.teamNames(record).join(', '),
           record.reporter || '',
           '', '', ''            // L, M, N hold pictures, not text
         ];

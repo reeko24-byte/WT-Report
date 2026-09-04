@@ -7,20 +7,25 @@
  *   LAPORAN TEAM WT
  *   ✅ Ari Kurniawan
  *   ✅ Nurdianto
- *   📍Loc          : South Area
- *   Segment      : 4(KOTA BATAK-KBJ)
- *   KP                 : 26+000
- *   Size Pipe     : 8"
- *   Note             : Area ROW saat ini terpantau aman dan tidak ada indikasi yg mencurigakan.
+ *   Location  : South Area
+ *   Segment   : 4(KOTA BATAK-KBJ)
+ *   KP        : 25 + 666
+ *   Size Pipe : 8"
+ *   Note      : Area ROW saat ini terpantau aman dan tidak ada indikasi yg mencurigakan.
  *
- * Four things about it are deliberate.
+ * Four things are deliberate.
  *
- * THE LABEL PADDING IS COPIED, NOT COMPUTED. The runs of spaces below are the
- * ones in the approved example, transcribed character for character. They do
- * not line the colons up -- WhatsApp renders in a proportional font, so nothing
- * would line them up -- and they are not all the same width. They are what the
- * group has been reading for months, which is worth more than tidiness. If they
- * are ever to change, they change HERE and nowhere else.
+ * THE COLONS LINE UP, and the padding that does it is COMPUTED, not typed. Every
+ * label is padded to the longest one, so renaming a label or adding a line can
+ * never leave the block half-aligned -- which is exactly what had happened to
+ * the hand-spaced version this replaced.
+ *
+ * It lines up exactly in the app's preview and in anything monospaced. WhatsApp
+ * itself sets messages in a proportional font, where equal numbers of characters
+ * are not equal widths, so there the colons land close together rather than in a
+ * dead-straight column. Nothing a plain message can do changes that, short of
+ * wrapping the whole report in a code block -- which would change how every
+ * other part of it reads.
  *
  * EVERY NAME GETS A TICK. The reporter first, then whoever walked with them, in
  * the order they were picked. One line each, no commas: the group counts the
@@ -40,18 +45,31 @@
 
   var TITLE = 'LAPORAN TEAM WT';
 
-  /* Transcribed from the approved example. Each string is the label with its
-     own trailing run of spaces; only the colon is added below. */
-  var LABEL_LOC     = '📍Loc          ';
-  var LABEL_SEGMENT = 'Segment      ';
-  var LABEL_KP      = 'KP                 ';
-  var LABEL_SIZE    = 'Size Pipe     ';
-  var LABEL_NOTE    = 'Note             ';
+  /* The labels, in the order they are printed. Their widths are not written
+     down anywhere -- the padding below is measured from this list, so this is
+     the only place a label is decided. */
+  var LABEL_LOCATION = 'Location';
+  var LABEL_SEGMENT  = 'Segment';
+  var LABEL_KP       = 'KP';
+  var LABEL_SIZE     = 'Size Pipe';
+  var LABEL_NOTE     = 'Note';
+
+  var LABELS = [LABEL_LOCATION, LABEL_SEGMENT, LABEL_KP, LABEL_SIZE, LABEL_NOTE];
+
+  var WIDTH = LABELS.reduce(function (widest, label) {
+    return Math.max(widest, label.length);
+  }, 0);
 
   var TICK = '✅ ';
 
+  function pad(label) {
+    var out = label;
+    while (out.length < WIDTH) out += ' ';
+    return out;
+  }
+
   function line(label, value) {
-    return label + ': ' + (value || '-');
+    return pad(label) + ' : ' + (value || '-');
   }
 
   WT.caption = {
@@ -60,10 +78,7 @@
 
     /** The tick list: the reporter, then the rest of the crew. */
     teamLines: function (record) {
-      var names = [record.reporter].concat(record.mates || []);
-      return names
-        .filter(function (name) { return name && String(name).trim(); })
-        .map(function (name) { return TICK + String(name).trim(); });
+      return WT.teamNames(record).map(function (name) { return TICK + name; });
     },
 
     /**
@@ -76,10 +91,12 @@
     build: function (record) {
       var lines = [TITLE].concat(WT.caption.teamLines(record));
 
-      lines.push(line(LABEL_LOC, record.zone));
+      lines.push(line(LABEL_LOCATION, record.zone));
       lines.push(line(LABEL_SEGMENT,
         WT.segmentText(record.segment, record.segmentName)));
-      lines.push(line(LABEL_KP, record.kp));
+      // kpPrint, not the raw KP: the space before the plus is the report's, and
+      // this is the report.
+      lines.push(line(LABEL_KP, WT.kpPrint(record.kp)));
       lines.push(line(LABEL_SIZE, WT.sizeText(record.pipeSize)));
       lines.push(line(LABEL_NOTE, (record.note || '').trim()));
 

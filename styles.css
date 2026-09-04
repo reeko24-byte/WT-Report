@@ -106,6 +106,30 @@ input:focus, select:focus, textarea:focus {
 
 textarea { min-height: 72px; resize: vertical; }
 
+/* The assigned stretch: two ends of one value, so they sit side by side and read
+   as a range rather than as two separate questions. */
+.kp-range { display: flex; align-items: center; gap: 8px; }
+.kp-range input {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1.5px;
+  font-size: 19px;
+}
+.kp-dash { color: var(--ink-soft); font-size: 20px; }
+
+/* The whole-segment shortcut sits under the range it fills, not stretched
+   across the screen: it sets a value, it is not one of a set of choices. */
+#a-whole {
+  flex: 0 0 auto;
+  min-height: 40px;
+  margin-top: 8px;
+  padding: 0 14px;
+  font-size: 15px;
+  color: var(--blue);
+}
+
 /* The KP is the identity of a record and gets read back aloud over the radio,
    so it is set larger and spaced out, in tabular figures. */
 #f-kp {

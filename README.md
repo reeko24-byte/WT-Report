@@ -30,21 +30,27 @@ Exactly the approved shape:
 LAPORAN TEAM WT
 ✅ Ari Kurniawan
 ✅ Nurdianto
-📍Loc          : South Area
-Segment      : 4(KOTA BATAK-KBJ)
-KP                 : 26+000
-Size Pipe     : 8"
-Note             : Area ROW saat ini terpantau aman dan tidak ada indikasi yg mencurigakan.
+Location  : South Area
+Segment   : 4(KOTA BATAK-KBJ)
+KP        : 25 + 666
+Size Pipe : 8"
+Note      : Area ROW saat ini terpantau aman dan tidak ada indikasi yg mencurigakan.
 ```
 
 Four things about it are deliberate.
 
-**The label padding is copied, not computed.** Those runs of spaces are the ones
-in the approved example, transcribed character for character. They do not line
-the colons up — WhatsApp renders in a proportional font, so nothing would line
-them up — and they are not all the same width. They are what the group has been
-reading, which is worth more than tidiness. They live in `js/caption.js` and
-nowhere else.
+**The colons line up, and the padding that does it is computed, not typed.**
+Every label is padded to the width of the longest, so renaming a label or adding
+a line can never leave the block half-aligned — which is what had happened to the
+hand-spaced version this replaced. The labels live in `js/caption.js` and nowhere
+else; their widths are not written down anywhere at all.
+
+It lines up exactly in the app's preview and in anything monospaced. **WhatsApp
+sets messages in a proportional font**, where equal numbers of characters are not
+equal widths, so there the colons land close together rather than in a
+dead-straight column. Nothing a plain message can do changes that, short of
+wrapping the whole report in a code block — which would change how every other
+part of it reads.
 
 **Every name gets a tick.** The reporter first, then whoever walked with them, in
 the order they were picked, one line each. The group counts the ticks to see how
@@ -68,12 +74,12 @@ Three per KP, and all three are burned with the same stamp:
 
 ```
                                           WALKTHROUGH        ← top right,
-                                          SURVEILLANCE          ~38% opaque
+                                          SURVEILLANCE          ~55% opaque
                               PERTAMINA GAS · BINA REKAYASA ANUGRAH
 
   LAPORAN TEAM WT · South Area
   Segment 4(KOTA BATAK-KBJ) · 8"
-  KP 26+000
+  KP 25 + 666
   Area ROW Terpantau Aman
   Tim: Ari Kurniawan, Nurdianto
   2026-09-03 08:14:22
@@ -94,8 +100,17 @@ wrong trade. The band never takes more than 38% of the frame.
 
 ### The logo watermark
 
-`assets/watermark.png`, drawn into the top right at 38% opacity across 30% of the
+`assets/watermark.png`, drawn into the top right at 55% opacity across 30% of the
 frame's width.
+
+**Every glyph carries a hard dark outline as well as a soft shadow**, and that is
+not decoration. White fill alone reads beautifully against grass and sky and all
+but disappears on anything pale — which is what happened the first time, on a
+photograph of a printed page. The outline is what carries the mark on light
+ground, the shadow is what separates it from dark ground, and together they mean
+the mark never depends on what is behind it. The opacity is set for the harder of
+the two cases: a mark that cannot be read on a document photograph is not
+identifying anything.
 
 **To use the real artwork, replace that one file.** Any transparent PNG works; it
 is scaled to 30% of the width and its own aspect ratio is kept. Nothing else has
@@ -150,22 +165,22 @@ real thing. Serve the app over HTTPS and it will never appear.
 
 ## The Excel it produces
 
-Twenty-six columns. One row per KP, with **four columns per photograph** rather
+Twenty-eight columns. One row per KP, with **four columns per photograph** rather
 than one set per row:
 
 | A | B | C | D | E | F |
 |---|---|---|---|---|---|
-| Tanggal | Waktu | Loc | Segment | Nama Segment | KP |
+| Tanggal | Waktu | Location | Segment | Nama Segment | KP |
 
-| G | H | I | J | K |
-|---|---|---|---|---|
-| Size Pipe | Kondisi | Note | Tim | Pelapor |
+| G | H | I | J | K | L | M |
+|---|---|---|---|---|---|---|
+| Penugasan From | Penugasan To | Size Pipe | Kondisi | Note | Tim | Pelapor |
 
-| L | M | N |
+| N | O | P |
 |---|---|---|
 | Photo 1 | Photo 2 | Photo 3 |
 
-| O–R | S–V | W–Z |
+| Q–T | U–X | Y–AB |
 |---|---|---|
 | Waktu / Kode / Lat / Long, photo 1 | …photo 2 | …photo 3 |
 
@@ -175,14 +190,38 @@ from another day or no position at all. One time and one pair of coordinates for
 the whole row could only ever have been right about one of them. A photo with no
 position leaves its pair genuinely empty rather than borrowing its neighbour's.
 
+**Penugasan is split across two columns**, the way ROWPowerline splits its
+location range, because the office sorts and filters on the ends of a stretch
+separately and a single `00 + 000 - 10 + 000` cell can do neither. It is stored on
+every row rather than once for the day: a day can carry two assignments, and what
+matters is which stretch each KP belongs to, not which one happened to be on
+screen when the file was exported. Set beside the `KP` column, it is what makes a
+coverage gap visible — assigned `00 + 000` to `10 + 000`, recorded up to `07 + 200`,
+and the rest of the stretch was not walked.
+
+**Tim is the whole crew, reporter included** — the same names in the same order
+as the ticks on the WhatsApp report, so the column can be read on its own.
+**Pelapor** names who filed it, which is a separate question from who walked; the
+reporter appearing in both columns is deliberate, not a duplicate. (Tim briefly
+held the crew *minus* the reporter, on the reasoning that Pelapor named them
+already. Nobody reads two columns to count a team, and a walk of two read as a
+walk of one. `WT.teamNames()` in `js/options.js` is now the single definition
+that the caption, the photo stamp and this column all use.)
+
 **Kondisi and Note are separate columns on purpose.** Kondisi is the short label —
 *Area ROW Terpantau Aman* or *Lainnya* — so a month of walks can be counted and
 filtered. Note is the sentence the group read. One column of free text could do
 neither.
 
-**Size Pipe and the coordinates are numbers, not text**, so they sort and filter,
-and they sit on Excel's **General** format — so Format Cells reads *General*,
-where anyone looks for a plain number, rather than *Custom*.
+**The coordinates are numbers, not text**, so they sort and filter, and they sit
+on Excel's **General** format — so Format Cells reads *General*, where anyone
+looks for a plain number, rather than *Custom*.
+
+**Size Pipe is text** — `8"`, or `24" & 20"` for segment 10/12, which runs two
+pipes down one right-of-way. It was a number until that segment was merged back
+into one, and no number holds two diameters. Nothing useful is lost: the
+autofilter still groups the sheet by pipe, which is all that column was ever for,
+and summing diameters was never going to mean anything.
 
 The header row is frozen, and so are the six columns that identify the point
 (through `KP`). Without that, scrolling out to the verification codes leaves a
@@ -214,31 +253,36 @@ into one folder.
 
 **Once, in the morning:**
 
-1. **Team** — Pipeline Walkthrough (Duri) or (Bangko).
+1. **Team** — Pipeline Walkthrough (Duri), (Bangko) or (South).
 2. **Nama Anda** — your name, from that team, or from *Roster lain*.
-3. **Anggota lain** — tick up to three more. The whole roster is offered, not just
-   your team: the approved example report pairs a Duri name with a name the
-   personnel list files under no area at all, and a picker that could not express
-   that would be wrong about the very report it was built from.
-4. **Loc** — North Area or South Area. Your team's own area is filled in for you
-   and can be changed.
+3. **Anggota lain** — tick up to three more, or none: a one-man walk is a normal
+   state, not an error. The whole roster is offered, not just your team, because
+   the approved example report is filed by a Duri name walking with a South name.
+   Crews lend each other people.
+4. **Location** — North Area or South Area. Your team's own area is filled in for
+   you and can be changed.
 5. **Segment** — filtered to that area.
-6. **Size Pipe** — filled in from the segment, and editable. The crew standing in
+6. **Penugasan (KP)** — the stretch you are sent to walk today: *Seg 8 from KP
+   00 + 000 to 10 + 000*. **Seluruh segment** fills it with the whole line in one
+   tap, using the segment's as-built length, so the commonest assignment of all
+   costs nothing to state.
+7. **Size Pipe** — filled in from the segment, and editable. The crew standing in
    front of the pipe can read its diameter; the table can only remember what it
    was told. Clear the field to hand it back to the segment.
 
 **Then, at every KP:**
 
-7. **KP** — type the digits; the `+` appears by itself, so `26000` becomes
-   `26+000`.
-8. **Note** — *Area ROW Terpantau Aman* is already selected, because it is the
+8. **KP** — type the digits; the `+` appears by itself, so `25666` becomes
+   `25+666`. A KP outside the assigned stretch is flagged in amber and still
+   saves — see below.
+9. **Note** — *Area ROW Terpantau Aman* is already selected, because it is the
    answer all day. The sentence that will be sent is shown underneath. Tap
    *Lainnya* to write something else.
-9. **Three photographs.** Ambil Foto, or Dari Galeri. Tap the × on a thumbnail to
-   drop one.
-10. **Simpan & Kirim** → the send screen, showing the report exactly as it will go
+10. **Three photographs.** Ambil Foto, or Dari Galeri. Tap the × on a thumbnail to
+    drop one.
+11. **Simpan & Kirim** → the send screen, showing the report exactly as it will go
     out → **Kirim ke WhatsApp**.
-11. **KP Berikutnya.**
+12. **KP Berikutnya.**
 
 **At the end of the day:** *Export ke Excel* → *Buat File Excel* → *Simpan ke
 Files* (Android) or *Kirim File ke WhatsApp* (iPhone).
@@ -249,6 +293,18 @@ half a day's records. They are on screen the whole time instead, with one link t
 change them. The **KP is always cleared** after a save: it is the identity of the
 record, and a carried-over value would look entirely valid while being the
 previous point's.
+
+### A KP outside the assignment is flagged, never refused
+
+Type a KP that falls outside the stretch on the assignment strip and an amber
+line appears under the field naming the stretch. **Saving still works.**
+
+Both halves of that are deliberate. Most of these are typos — a KP a digit out
+lands kilometres away, and catching it while the crew are still standing there is
+the whole value. But the crew are the ones standing there: assignments get
+extended, a team gets waved onto the next stretch, and an app that refused the
+record would simply lose it. The same rule the Android app follows — raise a
+flag, never block.
 
 ### The photo buttons wait for the form
 
@@ -397,34 +453,53 @@ sheet.
 
 ## Decisions worth confirming
 
-Four judgement calls were made where the sources did not agree or did not say.
-None of them blocks anything; all four are one edit to reverse.
+Judgement calls made where the sources did not agree or did not say. **All of
+these have now been settled by Billy**, so they are written up as decisions
+rather than questions — with what was got wrong first, because that is the part
+worth not repeating. Each is still one edit to reverse.
 
-**Segments 10 and 12 are listed separately, unlike the Android app.** ARROW treats
-them as one `10/12` because assets on that shared Batang–Dumai right-of-way cannot
-be attributed to one pipe. But they are two pipes of different diameter — 24" and
-20" — and this report has to name one Size Pipe. Merging them would have made that
-field a guess. If the walkthrough teams do file that corridor as one, merge the
-two entries and set Size Pipe by hand.
+**`10/12` is one segment, as it is in the Android app.** I first split it into a
+10 and a 12, reasoning that they are two pipes of different diameter and the
+report has to name one Size Pipe — and that was the wrong way round. The crews
+walk that Batang–Dumai right-of-way as one, so the segment is one and it carries
+both diameters: `Size Pipe : 24" & 20"`. That is why a segment's `size` is a list
+in `js/options.js` and not a number, and why the spreadsheet's Size Pipe column is
+text. A segment with two pipes is a real state, not an unfilled field.
 
-**`KP : 26+000`, not `26 +000`.** The approved example has a space before the `+`.
-Every other tool in this family writes `XX+XXX` with no space, and the field
-formats as you type, so this follows them. Say the word and it is one line in
-`js/options.js`.
+**A KP prints as `25 + 666`, spaced either side of the plus.** This took two
+passes, and the confusion is worth recording. I first dropped the space
+altogether, on the grounds that every other tool in this family writes `XX+XXX`.
+Billy asked for it back, so I read the spacing off his example as `25 +666` —
+which was itself a typo in that message. `XX + XXX` is the intended form and the
+one now in the code.
 
-**Segment lengths are not enforced.** ARROW flags a KP past a segment's documented
-end; this app does not, because a walkthrough is not an asset register and the
-brief does not ask for it. Easy to add later from `SegmentKpRange.kt`.
+It is a **printing** convention and nothing more: `WT.kpPrint()` in
+`js/options.js` inserts the spaces, and everything a person reads goes through
+there — the report, the photograph, the list, the spreadsheet. What is typed and
+stored is still `25+666`, because the input mask has to push the caret past the
+`+` as you type and doing that around spaces as well is how a KP ends up
+`2 5 + 66`; comparing two KPs, or checking one against a segment length, is also
+simpler on the tight form. One canonical string in the database and one printed
+form on the way out is why correcting the spacing was a one-line change.
 
-**The interface is Indonesian only.** ARROW's PWA and ROWPowerline both carry an
-ID/EN switch. This one does not, because the report itself is Indonesian in both
-of those anyway and nothing here is written for an English reader. Adding it is
-mechanical if it is wanted.
+**Segment lengths bound the assignment, and nothing else.** The as-built figures
+from `SegmentKpRange.kt` are in `js/options.js` as each segment's `end`, and they
+do one job: *Seluruh segment* uses them to fill the assigned stretch in a tap.
+The app never checks a recorded KP against a segment's length — only against the
+stretch the crew said they were walking, which is the tighter and more useful
+test, and even that only raises a flag.
 
-**Nurdianto is filed under no team**, because the personnel list gives him no
-area. He appears under *Roster lain* for both crews and can be picked as the
-reporter or as a team-mate. If he belongs to one, add `team: 'Duri'` (or
-`'Bangko'`) to his roster entry.
+**The interface is Indonesian only** — confirmed. ARROW's PWA and ROWPowerline
+both carry an ID/EN switch; this one does not, because the report itself is
+Indonesian in both of those anyway and nothing here is written for an English
+reader.
+
+**Pipeline Walkthrough (South) is a crew of one.** The personnel list gives
+Nurdianto no area; South is his, and he is its only member. Nothing about the app
+minds: only a reporter is ever required, team-mates are optional, and when the
+sole member of a crew is the reporter their section of the picker is left out
+rather than shown as an empty heading. He still appears under *Roster lain* for
+the other two crews, which is what the approved example report needs.
 
 ---
 
@@ -437,7 +512,7 @@ manifest.webmanifest    home-screen install
 sw.js                   offline shell; bump CACHE_VERSION to deploy
 assets/watermark.png    the top-right mark — replace this file to change it
 icons/                  home-screen icons
-js/options.js           roster, teams, zones, segments, conditions, KP, numbers, time
+js/options.js           roster, teams, zones, segments, conditions, KP, sizes, time
 js/caption.js           the LAPORAN TEAM WT report — the approved wording
 js/seal.js              the verification code
 js/photo.js             orient, resize, stamp, watermark, seal, compress
@@ -457,17 +532,20 @@ whatever browser the crew's phone happens to have.
 
 Checked on 2026-09-03, running the app from a local server:
 
-- **The whole flow**, crew → assignment → KP → three photographs → save → send
-  screen, with the report text matching the approved shape character for
-  character.
+- **The whole flow**, crew → assignment (including the assigned stretch) → KP →
+  three photographs → save → send screen, with the report text matching the
+  approved shape character for character.
+- **The assignment**: *Seluruh segment* filling `00 + 000 – 12 + 820` for segment 8
+  from its as-built length, narrowing it to `10 + 000` by hand, and a KP of
+  `11 + 200` raising the out-of-range flag while still saving.
 - **The photo pipeline** on both landscape and portrait captures: watermark,
   wrapped information band, micro-print and seal all placed and legible.
 - **The seal**: SHA-256 through WebCrypto, a stable 48-bit code, and the full
   digest stored on the record.
 - **The Excel**: built, written to disk and re-opened with a spreadsheet library.
   Zip intact, 26 columns, one row per point, six embedded photographs, frozen
-  panes at G2, autofilter over `A1:Z3`, Size Pipe and coordinates numeric on
-  General, empty coordinate cells genuinely empty for a photo with no fix, and
+  panes at G2, autofilter over `A1:AB3`, 28 columns including the split
+  Penugasan, coordinates numeric on General, empty coordinate cells genuinely empty for a photo with no fix, and
   `&`, `<`, `>`, `"` in a note round-tripping exactly.
 - **Crew and assignment survive a reload** and the app reopens on the survey
   screen.

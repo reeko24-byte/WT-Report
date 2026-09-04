@@ -23,16 +23,22 @@ WT.OPTIONS = {
      does not argue. */
   teams: [
     { id: 'Duri',   label: 'Pipeline Walkthrough (Duri)',   zone: 'South Area' },
-    { id: 'Bangko', label: 'Pipeline Walkthrough (Bangko)', zone: 'North Area' }
+    { id: 'Bangko', label: 'Pipeline Walkthrough (Bangko)', zone: 'North Area' },
+    { id: 'South',  label: 'Pipeline Walkthrough (South)',  zone: 'South Area' }
   ],
 
   /* Names exactly as the personnel list spells them, with the badge number so
      two people with similar names can be told apart on the picker.
 
-     Nurdianto is listed without an area on that sheet, so he is filed under no
-     team rather than guessed into one -- and the team-mate picker offers the
-     whole roster regardless, because the approved example report pairs him with
-     a Duri name. */
+     The personnel list gives Nurdianto no area; the South crew is his, and he is
+     its only member. A one-man crew is a normal state here, not an error -- the
+     app only ever requires a reporter, and team-mates are optional.
+
+     The team-mate picker still offers the WHOLE roster whichever team is chosen,
+     because the approved example report is filed by Ari Kurniawan (Duri) walking
+     with Nurdianto (South). Crews lend each other people, and a picker that
+     could not express that would be wrong about the very report it was built
+     from. */
   roster: [
     { name: 'Ari Kurniawan',             badge: 'BRA09-24060046', team: 'Duri' },
     { name: 'Dewangga Salsabila',        badge: 'BRA09-24060017', team: 'Duri' },
@@ -43,7 +49,7 @@ WT.OPTIONS = {
     { name: 'Juhar',                     badge: 'BRA09-24060051', team: 'Bangko' },
     { name: 'Robby Gusviando',           badge: 'BRA09-24060048', team: 'Bangko' },
     { name: 'Nanda Irawan',              badge: 'BRA09-24060058', team: 'Bangko' },
-    { name: 'Nurdianto',                 badge: 'BRA09-24060052', team: '' }
+    { name: 'Nurdianto',                 badge: 'BRA09-24060052', team: 'South' }
   ],
 
   /* The report writes "South Area", so that is what is stored. The Android app
@@ -53,27 +59,36 @@ WT.OPTIONS = {
 
   /* id      what the report calls the segment: "Segment : 4(KOTA BATAK-KBJ)"
      name    the two ends, no spaces around the dash, as the example writes it
-     size    nominal diameter in inches, which fills Size Pipe by itself
+     size    nominal diameters in inches -- a LIST, which fills Size Pipe by
+             itself and prints as 8" or 24" & 20"
+     end     how many metres the segment runs, which is what "seluruh segment"
+             fills the assigned stretch with
      zone    which work area it belongs to, following AssetOptions.kt
 
-     10 and 12 are listed SEPARATELY here, unlike the Android app, which treats
-     them as one "10/12". They share the Batang-Dumai route but they are two
-     pipes of different diameter -- 24" and 20" -- and this report has to name
-     one Size Pipe. Merging them would make that field a guess. */
+     The lengths are the as-built figures from `SegmentKpRange.kt` in the Android
+     app -- measured off the Rokan project KMZ, not the project archive, which
+     several of them disagreed with. They are used here only to offer a default
+     stretch; nothing is ever refused for falling outside one.
+
+     "10/12" IS ONE SEGMENT, exactly as the Android app has it. The two pipes run
+     the same Batang-Dumai right-of-way and the crew walk them as one, so the
+     report names one segment carrying both diameters -- 24" and 20" -- rather
+     than making the walk choose a pipe it is not walking. That is why size is a
+     list here and not a number: a segment with two pipes is a real state, not an
+     unfilled field. */
   segments: [
-    { id: '1',   name: 'GS1-MTF',         size: 8,  zone: 'South Area' },
-    { id: '2',   name: 'MTF-NBS',         size: 10, zone: 'South Area' },
-    { id: '3',   name: 'NBS-DURI',        size: 20, zone: 'South Area' },
-    { id: '4',   name: 'KOTA BATAK-KBJ',  size: 8,  zone: 'South Area' },
-    { id: '5',   name: 'LIBO-MINDAL',     size: 4,  zone: 'South Area' },
-    { id: '6',   name: 'DURI CPS-BATANG', size: 20, zone: 'North Area' },
-    { id: '7',   name: 'BANGKO-BATANG',   size: 16, zone: 'North Area' },
-    { id: '8',   name: 'BALAM-BANGKO',    size: 8,  zone: 'North Area' },
-    { id: '9',   name: 'BENAR-BANGKO',    size: 4,  zone: 'North Area' },
-    { id: '10',  name: 'BATANG-DUMAI',    size: 24, zone: 'North Area' },
-    { id: '11A', name: 'CGS1-CGS10',      size: 8,  zone: 'North Area' },
-    { id: '11B', name: 'CGS10-BATANG',    size: 20, zone: 'North Area' },
-    { id: '12',  name: 'BATANG-DUMAI',    size: 20, zone: 'North Area' }
+    { id: '1',     name: 'GS1-MTF',         size: [8],      end: 2020,  zone: 'South Area' },
+    { id: '2',     name: 'MTF-NBS',         size: [10],     end: 16600, zone: 'South Area' },
+    { id: '3',     name: 'NBS-DURI',        size: [20],     end: 57070, zone: 'South Area' },
+    { id: '4',     name: 'KOTA BATAK-KBJ',  size: [8],      end: 33750, zone: 'South Area' },
+    { id: '5',     name: 'LIBO-MINDAL',     size: [4],      end: 12950, zone: 'South Area' },
+    { id: '6',     name: 'DURI CPS-BATANG', size: [20],     end: 39730, zone: 'North Area' },
+    { id: '7',     name: 'BANGKO-BATANG',   size: [16],     end: 47170, zone: 'North Area' },
+    { id: '8',     name: 'BALAM-BANGKO',    size: [8],      end: 12820, zone: 'North Area' },
+    { id: '9',     name: 'BENAR-BANGKO',    size: [4],      end: 10740, zone: 'North Area' },
+    { id: '10/12', name: 'BATANG-DUMAI',    size: [24, 20], end: 36800, zone: 'North Area' },
+    { id: '11A',   name: 'CGS1-CGS10',      size: [8],      end: 9530,  zone: 'North Area' },
+    { id: '11B',   name: 'CGS10-BATANG',    size: [20],     end: 26790, zone: 'North Area' }
   ],
 
   /* The Note line has exactly two answers, and the first is the one used all
@@ -135,6 +150,41 @@ WT.conditionByLabel = function (label) {
   return found;
 };
 
+/**
+ * Every name on a report, reporter first -- the crew as the group reads it.
+ *
+ * One definition, used by the caption's tick list, the photograph's stamp and
+ * the spreadsheet's Tim column, because they are answering the same question:
+ * who walked this KP. They disagreed once -- the spreadsheet listed the crew
+ * MINUS the reporter, so a two-man walk read as a one-man walk in the only
+ * place anybody counts them -- and the way to stop that recurring is for there
+ * to be nowhere else to get the answer.
+ *
+ * Takes anything with `reporter` and `mates`, which covers both a stored record
+ * and the live crew on screen.
+ */
+WT.teamNames = function (crew) {
+  if (!crew) return [];
+  return [crew.reporter].concat(crew.mates || [])
+    .filter(function (name) { return name && String(name).trim(); })
+    .map(function (name) { return String(name).trim(); });
+};
+
+/** 12820 -> "12+820" -- a distance along the line, as a KP. */
+WT.metresToKp = function (metres) {
+  if (metres == null || isNaN(metres)) return '';
+  var km = Math.floor(metres / 1000);
+  var m = Math.round(metres % 1000);
+  return (km < 10 ? '0' + km : String(km)) + '+' +
+    (m < 10 ? '00' + m : m < 100 ? '0' + m : String(m));
+};
+
+/** Where a segment ends, as a KP: "12+820". Empty if we have no figure. */
+WT.segmentEndKp = function (id) {
+  var segment = WT.segmentById(id);
+  return segment && segment.end != null ? WT.metresToKp(segment.end) : '';
+};
+
 /** "4(KOTA BATAK-KBJ)" -- how the report names a segment, in one string. */
 WT.segmentText = function (id, name) {
   if (!id) return '';
@@ -167,8 +217,55 @@ WT.kpMetres = function (kp) {
   return parseInt(parts[0], 10) * 1000 + parseInt(parts[1], 10);
 };
 
-/** "26+000" -> "KP 26+000", for the photograph and the list. */
-WT.kpText = function (kp) { return kp ? 'KP ' + kp : ''; };
+/**
+ * "26+000" -> "26 + 000" -- how a KP is PRINTED, spaced either side of the plus.
+ *
+ * Stored and typed without the spaces. The mask has to insert the "+" as you
+ * type and the caret has to be pushed back past it, and doing that around
+ * spaces as well is how a KP ends up "2 6 + 00"; comparing two of them, or
+ * checking one against a segment's length, is also simpler on the tight form.
+ * So the spacing belongs to printing, and printing only -- there is exactly one
+ * canonical KP string in the database and it never carries a space.
+ *
+ * The spacing is the report's, and it is used everywhere the KP is read by a
+ * person: the report, the photograph, the list and the spreadsheet.
+ */
+WT.kpPrint = function (kp) {
+  return kp ? String(kp).replace('+', ' + ') : '';
+};
+
+/** "26+000" -> "KP 26 + 000", for the photograph and the list. */
+WT.kpText = function (kp) { return kp ? 'KP ' + WT.kpPrint(kp) : ''; };
+
+/**
+ * The assigned stretch, as one string: "KP 00 + 000 - KP 10 + 000".
+ *
+ * A crew sent to a single KP rather than a stretch gets the short form, for the
+ * same reason ROWPowerline shortens a power line that crosses at one point:
+ * "KP 00 + 000 - KP 00 + 000" says nothing more and reads like a mistake.
+ */
+WT.kpRangeText = function (from, to) {
+  if (!from && !to) return '';
+  if (!to || from === to) return WT.kpText(from);
+  if (!from) return WT.kpText(to);
+  return WT.kpText(from) + ' - ' + WT.kpText(to);
+};
+
+/**
+ * Whether a KP falls inside an assigned stretch.
+ *
+ * The ends are taken in whichever order they were typed -- a crew walking back
+ * down the line enters the high KP first as often as not, and that is not an
+ * error worth a message. Returns true when anything is missing: this only ever
+ * raises a flag, and a flag raised on incomplete information is just noise.
+ */
+WT.kpWithin = function (kp, from, to) {
+  var at = WT.kpMetres(kp);
+  var a = WT.kpMetres(from);
+  var b = WT.kpMetres(to);
+  if (at == null || a == null || b == null) return true;
+  return at >= Math.min(a, b) && at <= Math.max(a, b);
+};
 
 /* -- Numbers ----------------------------------------------------------- */
 
@@ -232,10 +329,56 @@ WT.formatNumber = function (value, maxDecimals) {
   return parts.length > 1 ? whole + '.' + parts[1] : whole;
 };
 
-/** 8 -> '8"' -- the Size Pipe line, and the photograph's stamp. */
+/* -- Size Pipe -------------------------------------------------------- */
+
+/* A segment can carry more than one pipe -- 10/12 runs a 24" and a 20" down the
+   same right-of-way -- so a size is a LIST of diameters, not a number. A bare
+   number is still accepted everywhere a list is, because records saved before
+   this stored one. */
+
+function sizeList(inches) {
+  if (inches == null || inches === '') return [];
+  return Object.prototype.toString.call(inches) === '[object Array]'
+    ? inches
+    : [inches];
+}
+
+/** [8] -> '8"',  [24, 20] -> '24" & 20"' -- the report line and the stamp. */
 WT.sizeText = function (inches) {
-  var text = WT.formatNumber(inches, 2);
-  return text ? text + '"' : '';
+  var parts = sizeList(inches)
+    .map(function (value) { return WT.formatNumber(value, 2); })
+    .filter(function (text) { return text; });
+  return parts.length ? parts.join('" & ') + '"' : '';
+};
+
+/** [24, 20] -> '24 & 20' -- what goes in the editable field, without the marks. */
+WT.sizeInputText = function (inches) {
+  return sizeList(inches)
+    .map(function (value) { return WT.formatNumber(value, 2); })
+    .filter(function (text) { return text; })
+    .join(' & ');
+};
+
+/**
+ * Reads a typed Size Pipe back into a list.
+ *
+ * Deliberately generous about the separator: the field is pre-filled as
+ * `24 & 20`, and an operator correcting it by hand will just as readily write
+ * `24/20`, `24, 20` or `24 dan 20`. All of them mean the same thing, and none of
+ * them is worth refusing.
+ *
+ * Zero and negatives are dropped rather than kept: unlike a length or a
+ * clearance, a pipe of 0" is not a measurement anybody took.
+ */
+WT.parseSizes = function (text) {
+  var sizes = [];
+  String(text == null ? '' : text)
+    .split(/[&,;/+]|\band\b|\bdan\b/i)
+    .forEach(function (part) {
+      var value = WT.parseNumber(part);
+      if (value != null && value > 0) sizes.push(value);
+    });
+  return sizes;
 };
 
 /* -- Time -------------------------------------------------------------- */

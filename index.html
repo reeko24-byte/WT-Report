@@ -59,7 +59,7 @@
   </header>
   <div class="pad">
     <div class="field">
-      <span>Loc</span>
+      <span>Location</span>
       <div id="a-zone" class="chips wrap"></div>
     </div>
 
@@ -68,9 +68,30 @@
       <select id="a-segment"></select>
     </label>
 
+    <!-- The stretch the crew is sent to walk today. It is not the KP of any one
+         record — it is the boundary those records are expected to fall inside,
+         and the app says so when one does not. -->
+    <div class="field">
+      <span>Penugasan (KP)</span>
+      <div class="kp-range">
+        <input id="a-kp-from" type="text" inputmode="numeric" pattern="[0-9+]*"
+               placeholder="00+000" maxlength="6" enterkeyhint="next"
+               aria-label="KP awal penugasan">
+        <span class="kp-dash">–</span>
+        <input id="a-kp-to" type="text" inputmode="numeric" pattern="[0-9+]*"
+               placeholder="10+000" maxlength="6" enterkeyhint="next"
+               aria-label="KP akhir penugasan">
+      </div>
+      <!-- One tap for the commonest assignment of all: the whole segment. The
+           end comes from the as-built length, so it is a real figure and not a
+           round number somebody guessed. -->
+      <button id="a-whole" class="chip small" type="button">Seluruh segment</button>
+    </div>
+    <p id="a-range-hint" class="hint"></p>
+
     <label class="field">
       <span>Size Pipe (inch)</span>
-      <input id="a-size" type="text" inputmode="decimal" placeholder="8" enterkeyhint="done">
+      <input id="a-size" type="text" placeholder="8" enterkeyhint="done">
     </label>
     <p id="a-size-hint" class="hint"></p>
 
@@ -114,6 +135,9 @@
              placeholder="26+000" maxlength="6" enterkeyhint="next" aria-label="KP">
     </label>
     <p id="kp-hint" class="hint">Ketik angkanya saja — tanda + muncul sendiri.</p>
+    <!-- A KP outside the assigned stretch is worth saying out loud and never
+         worth refusing: the crew are the ones standing there. -->
+    <p id="kp-outside" class="warn hidden"></p>
 
     <div class="field">
       <span>Note</span>
