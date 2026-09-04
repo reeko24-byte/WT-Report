@@ -424,10 +424,32 @@ URL on the phone, then **Add to Home Screen**.
 sheet, geolocation, and the SHA-256 seal. Over plain `http` the app still runs,
 but photographs are stamped `WT-BASIC` and sharing will not work.
 
-**Bump `CACHE_VERSION` in `sw.js` on every deploy.** It is what pushes the update
-to phones that already have the app on their home screen. The version marker at
-the bottom of the survey screen reads the live cache name, so it cannot claim to
-be newer than it is.
+### Bump `CACHE_VERSION` in `sw.js` on every upload
+
+Not a label — **it is the entire update mechanism**, and forgetting it is the one
+deployment mistake that gives no error message at all.
+
+A browser decides whether to install a new service worker by comparing the
+**bytes** of `sw.js` against the copy it already has. It is that new worker which
+re-caches everything else. So if `sw.js` has not changed, nothing has changed as
+far as the phone is concerned: every other file can be replaced on the server and
+a phone with the app on its home screen will keep serving the old ones, silently,
+for as long as it stays installed. Nothing fails, nothing warns, and the app just
+carries on being the version it was.
+
+**The symptom is the version marker at the bottom of the survey screen still
+reading the old number after an upload.** That line reads the live cache name
+rather than a constant in the page, precisely so it cannot claim to be newer than
+it is — so when it disagrees with what was uploaded, believe the line.
+
+The fix is always the same: change the number, upload again, reopen the app.
+Where it says *reload to apply*, the new worker has installed but the page is
+still running under the old one; one reload finishes it.
+
+| Version | What changed |
+|---|---|
+| `v1` | first build |
+| `v2` | `Location` label and aligned colons · Pipeline Walkthrough (South) · `Tim` carries the whole crew · `10/12` merged with `24" & 20"` · watermark outlined and raised to 55% · KP prints `XX + XXX` · assigned stretch (Penugasan) |
 
 Everything is cached for offline use on first load, `assets/watermark.png`
 included — it is part of the shell, not an extra, because a walk that started

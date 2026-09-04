@@ -8,7 +8,13 @@
  * every photograph, so a walk that started offline without it would produce a
  * day of unmarked pictures. */
 
-var CACHE_VERSION = 'wt-surveillance-v1';
+/* BUMP THIS ON EVERY UPLOAD. It is not a label — it is the whole update
+   mechanism. A browser decides whether to install a new service worker by
+   comparing the BYTES of this file with the one it already has, and it is the
+   new worker that re-caches everything else. Upload twenty changed files with
+   this line untouched and a phone that already has the app keeps serving the
+   old ones, silently, for as long as it is installed. */
+var CACHE_VERSION = 'wt-surveillance-v2';
 
 /* Relative paths throughout, so the app works from a project subdirectory on
    GitHub Pages as well as from a domain root. */
