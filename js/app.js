@@ -1659,23 +1659,42 @@
   /* ── Diagnostics ────────────────────────────────────────────────────── */
 
   /**
-   * Shows which version this phone is actually running.
+   * Shows which version this phone is actually running — BOTH halves of it.
    *
-   * Read from the name of the live cache rather than a constant in the page,
-   * because a constant would be served from that same stale cache and cheerfully
-   * report the new version while running the old one. The cache name is the one
-   * thing that cannot lie about itself.
+   * This line used to print the cache name alone, on the reasoning that a
+   * constant in the page would be served from that same stale cache and
+   * cheerfully report the new version while running the old one. True, and it
+   * missed the case that actually happened: the new worker installs and creates
+   * the new cache, but the page carries on executing the JavaScript it parsed at
+   * launch. The marker then reads v6 while every screen is still v5's, and the
+   * one thing meant to settle "which version am I on" becomes the thing that
+   * misleads. That cost an afternoon on 2026-09-06.
+   *
+   * So both are printed. BUILD lives in this file, so it is stale exactly when
+   * the running code is stale — which is the whole point. The cache name says
+   * what has been downloaded. When they disagree, the download has arrived and
+   * the app simply has not been restarted, and the line says so in words the
+   * crew can act on.
    */
+  var BUILD = 'v7';   // keep in step with CACHE_VERSION in sw.js
+
   function showVersion() {
     var line = $('app-version');
-    if (!window.caches || !caches.keys) { line.textContent = ''; return; }
+    var running = 'kode ' + BUILD;
+
+    if (!window.caches || !caches.keys) { line.textContent = running; return; }
+
     caches.keys().then(function (names) {
-      var mine = names.filter(function (name) { return name.indexOf('wt-surveillance-') === 0; });
-      var controlled = navigator.serviceWorker && navigator.serviceWorker.controller;
-      line.textContent = mine.length
-        ? mine.sort().join(', ') + (controlled ? '' : ' · reload to apply')
-        : 'not cached';
-    }).catch(function () { line.textContent = ''; });
+      var mine = names.filter(function (name) {
+        return name.indexOf('wt-surveillance-') === 0;
+      }).sort();
+
+      if (!mine.length) { line.textContent = running + ' · belum tersimpan offline'; return; }
+
+      var cached = mine[mine.length - 1].replace('wt-surveillance-', '');
+      line.textContent = running + ' · cache ' + cached +
+        (cached === BUILD ? '' : ' · TUTUP APLIKASI & BUKA LAGI');
+    }).catch(function () { line.textContent = running; });
   }
 
   /**

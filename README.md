@@ -474,14 +474,27 @@ a phone with the app on its home screen will keep serving the old ones, silently
 for as long as it stays installed. Nothing fails, nothing warns, and the app just
 carries on being the version it was.
 
-**The symptom is the version marker at the bottom of the survey screen still
-reading the old number after an upload.** That line reads the live cache name
-rather than a constant in the page, precisely so it cannot claim to be newer than
-it is — so when it disagrees with what was uploaded, believe the line.
+**The version marker at the bottom of the survey screen prints two things, and
+the pair is what matters:**
 
-The fix is always the same: change the number, upload again, reopen the app.
-Where it says *reload to apply*, the new worker has installed but the page is
-still running under the old one; one reload finishes it.
+```
+kode v7 · cache v7                          ← running the uploaded version
+kode v5 · cache v7 · TUTUP APLIKASI & BUKA LAGI   ← downloaded, not yet running
+```
+
+`kode` is a constant in `js/app.js`, so it is stale exactly when the running
+code is stale. `cache` is the service worker's cache name, so it says what has
+been downloaded. **When they disagree the files have arrived and the app has
+simply not been restarted** — closing it fully and reopening finishes the job.
+
+That line used to print the cache name alone, on the reasoning that a constant
+would be served from the same stale cache and lie about itself. True, and it
+missed the case that actually happened on 2026-09-06: the new worker installs and
+builds the new cache, but the page keeps executing the JavaScript it parsed at
+launch. The marker read `v6` while every screen was still `v3`'s, sending an
+afternoon chasing a bug that had already been fixed. **Bump `BUILD` in
+`js/app.js` together with `CACHE_VERSION`** — they are a pair, and the diagnostic
+is worthless if they drift.
 
 | Version | What changed |
 |---|---|
@@ -491,6 +504,7 @@ still running under the old one; one reload finishes it.
 | `v4` | caption travels with the photographs again, as ROWPowerline does; the paste steps show only when the browser refuses the pair |
 | `v5` | *withdrawn* — per-phone switch between the two share shapes; unnecessary once the real cause was found |
 | `v6` | the send screen names the share target to tap: WhatsApp's app icon, not a contact shortcut |
+| `v7` | version marker prints running code *and* cache, so "downloaded but not restarted" can no longer look like "already updated" |
 
 Everything is cached for offline use on first load, `assets/watermark.png`
 included — it is part of the shell, not an extra, because a walk that started
