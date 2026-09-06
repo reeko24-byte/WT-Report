@@ -205,12 +205,15 @@
          box belongs to WhatsApp — so it is stated rather than remembered. -->
     <div id="send-steps" class="steps"></div>
 
+    <!-- Which share target to pick. The top row of Android's share sheet is
+         WhatsApp's direct-share shortcuts, which caption each photograph on its
+         own; the app icon below opens WhatsApp's own picker and media editor,
+         where one caption covers the whole album. Same photos, same caption,
+         two different results — so it is said on screen, every time. -->
+    <p id="send-tip" class="tip"></p>
+
     <button id="send-share" class="primary">Kirim ke WhatsApp</button>
     <button id="send-copy" class="secondary">Salin Caption</button>
-    <!-- Per-phone escape hatch. WhatsApp on some phones now stamps the shared
-         caption onto every photograph separately; the phone that has that
-         problem switches itself, and the rest are left on one tap. -->
-    <button id="send-mode-toggle" class="link hidden"></button>
     <p id="send-note" class="hint"></p>
 
     <button id="send-next" class="secondary">KP Berikutnya</button>

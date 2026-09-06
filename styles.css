@@ -377,6 +377,23 @@ textarea { min-height: 72px; resize: vertical; }
   line-height: 24px;
 }
 
+/* ── The one instruction that decides how the report lands ───────────── */
+
+/* Which icon to tap on Android's share sheet. Not a hint — getting it wrong
+   turns one tidy report into three messy ones, and nothing in the result tells
+   the operator why. So it sits directly above the button, in body-size type. */
+.tip {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--amber);
+  background: var(--amber-bg);
+  border: 1.5px solid #E5C77A;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 16px 0 0;
+}
+.tip:empty { display: none; }
+
 /* ── Buttons ─────────────────────────────────────────────────────────── */
 
 button {

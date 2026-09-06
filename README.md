@@ -363,31 +363,40 @@ route** — an extra step on every KP, twenty times a day, is not a fix.
 | *Browser ini hanya mengirim foto* | Photos only; caption is on the clipboard, paste it |
 | *Browser ini tidak bisa membagikan foto* | No file sharing here; open in Chrome or Safari |
 
-### If the caption arrives three times, once under each photograph
+### The share target decides whether it is one message or three
 
-**Settled on 2026-09-06: this is a change outside the app.** A crew phone sent
-three photographs and one caption as a single WhatsApp album on 31 August 2026,
-from this exact call. Six days later the same call, from both this app and
-ROWPowerline, put the caption under each photograph separately on Billy's phone.
-Neither app changed in between, and it is not the photo count (the August album
-had three) and not orientation (every photograph is normalised before sharing).
-WhatsApp or Chrome changed how a shared caption is applied to several images.
+**This is the single most important thing to get right when sending, and it is
+invisible from the result.** Found by Billy on 2026-09-06, after two wrong
+diagnoses of mine.
 
-Which of the two, and how widely it has spread, is **not known** — it cannot be
-read off the phone, and the August evidence comes from a different handset than
-the September evidence. So the app does not guess. It keeps the one-tap share as
-the default and gives the affected phone a switch.
+Android's share sheet has two rows. The top row is **WhatsApp's direct-share
+shortcuts** — one per recent chat, each showing the contact's picture. The row
+below holds the **apps themselves**.
 
-**Per phone, remembered, and worded as the symptom:** the send screen carries
-*"Caption muncul 3x di grup? Ganti cara kirim"*. Tapping it moves that phone to
-photographs-only plus a pasted caption, and the three steps appear. Tapping it
-again moves back. Nothing changes for a phone that still sends correctly, which
-is the point — the fleet is mixed, and an extra step imposed on everybody to fix
-some phones is the wrong trade.
+| Tapped | What the group gets |
+|---|---|
+| The **WhatsApp icon** (lower row), then pick the chat | Three photographs as **one album, one caption** ✅ |
+| A **contact shortcut** (top row) | The caption stamped on **each** photograph — three messages ❌ |
 
-**The paste must never become the default.** It was tried on 2026-09-06 as the
-app-wide behaviour and rejected within the hour: an extra step on an action
-performed twenty times a day is not a fix, however much better the message looks.
+Same photographs, same caption, same `navigator.share()` call. The difference is
+entirely inside WhatsApp: the direct-share path captions each image on its own,
+while the app icon opens WhatsApp's own chat picker and media editor, where one
+caption covers the whole album.
+
+Because nothing in the outcome explains why, the send screen says it every time,
+in amber, directly above the button — and it is step 6 of `PANDUAN.txt` with the
+warning that it is the one most often got wrong.
+
+**Two diagnoses I got wrong before Billy found it**, recorded so they are not
+repeated: it is not the photo count (a live album from 31 August held three), and
+it is not orientation (every photograph is normalised before sharing). It was
+also not a WhatsApp or Chrome update, which the evidence appeared to support
+right up until the real cause turned out to be which icon a thumb landed on.
+
+**What was tried and withdrawn:** dropping the caption from the share payload and
+asking for a paste (correct output, an extra step on every KP — rejected), and a
+per-phone switch between the two (unnecessary once the real cause was known).
+Neither is in the code. The share is one tap, caption included, as it always was.
 
 Sending the Excel is deliberately two taps on the export screen (build, then
 send). A browser withdraws a page's permission to open the share sheet if the
@@ -480,7 +489,8 @@ still running under the old one; one reload finishes it.
 | `v2` | `Location` label and aligned colons · Pipeline Walkthrough (South) · `Tim` carries the whole crew · `10/12` merged with `24" & 20"` · watermark outlined and raised to 55% · KP prints `XX + XXX` · assigned stretch (Penugasan) |
 | `v3` | *withdrawn* — dropped the caption from the share payload and asked for a paste. Correct output, but an extra step on every KP; rejected |
 | `v4` | caption travels with the photographs again, as ROWPowerline does; the paste steps show only when the browser refuses the pair |
-| `v5` | per-phone switch on the send screen for phones where WhatsApp has started stamping the caption onto each photograph |
+| `v5` | *withdrawn* — per-phone switch between the two share shapes; unnecessary once the real cause was found |
+| `v6` | the send screen names the share target to tap: WhatsApp's app icon, not a contact shortcut |
 
 Everything is cached for offline use on first load, `assets/watermark.png`
 included — it is part of the shell, not an extra, because a walk that started

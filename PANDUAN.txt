@@ -51,10 +51,17 @@ Team dan penugasan tersimpan seharian. Kalau ganti penugasan, tekan *Ubah*.
 2. Pilih *Note* (sudah otomatis "Area ROW Terpantau Aman"; tekan *Lainnya* bila ada temuan)
 3. Ambil *3 foto*
 4. Tekan *Simpan & Kirim*
-5. Periksa captionnya, lalu tekan *Kirim ke WhatsApp* → pilih grup → Kirim
-6. Tekan *KP Berikutnya*
+5. Periksa captionnya, lalu tekan *Kirim ke WhatsApp*
+6. ⚠️ *INI YANG PALING SERING SALAH:*
+   Di menu berbagi yang muncul, pilih *ikon WhatsApp di baris bawah* — *JANGAN* foto kontak di baris atas.
+   Setelah itu baru pilih grupnya, lalu Kirim.
+7. Tekan *KP Berikutnya*
 
-📋 Foto dan caption terkirim bersamaan. Kalau di HP tertentu captionnya tidak ikut, tekan *Salin Caption* lalu tempel di kolom caption WhatsApp.
+*Kenapa?*
+• Lewat *ikon WhatsApp* → 3 foto jadi *satu album, satu caption* ✅
+• Lewat *foto kontak di baris atas* → caption *terulang di setiap foto*, jadi 3 pesan ❌
+
+Fotonya sama, captionnya sama — bedanya cuma ikon yang ditekan.
 
 ⚠️ Isi KP dan Note *sebelum* ambil foto. Tulisan di foto dibuat saat foto diambil dan tidak bisa diperbaiki setelahnya.
 
