@@ -1095,6 +1095,17 @@
    * between the tap and navigator.share() is time in which the browser can
    * decide the tap no longer counts, and it then refuses with NotAllowedError —
    * so the handler is left with a single statement to run.
+   *
+   * THE PHOTOGRAPHS GO WITHOUT `text`, DELIBERATELY. Handing WhatsApp three
+   * images and a caption together does not produce one message: WhatsApp copies
+   * that caption onto every image, so the group receives the same report three
+   * times, once under each photograph, and no album at all. Sent as three plain
+   * images they arrive as one album, and the caption is pasted into WhatsApp's
+   * own caption box — which is the only way to get one report under one album,
+   * and is also how the other crews' reports are put together.
+   *
+   * So the caption travels by clipboard rather than in the payload. It is
+   * copied inside the same tap, before share() is called.
    */
   function openSend(record) {
     var caption = WT.caption.build(record);
@@ -1106,9 +1117,8 @@
     });
 
     var mode = 'none';
-    if (navigator.canShare && files.length) {
-      if (navigator.canShare({ files: files, text: caption })) mode = 'text';
-      else if (navigator.canShare({ files: files })) mode = 'files';
+    if (navigator.canShare && files.length && navigator.canShare({ files: files })) {
+      mode = 'files';
     }
 
     state.sending = { record: record, caption: caption, files: files, mode: mode };
@@ -1140,10 +1150,33 @@
     $('send-caption').textContent = sending.caption;
 
     $('send-share').disabled = sending.mode === 'none';
-    $('send-note').textContent =
-      sending.mode === 'text' ? 'Foto dan caption dikirim bersamaan.'
-      : sending.mode === 'files' ? 'Browser ini hanya mengirim foto — salin caption dulu.'
-      : 'Browser ini tidak bisa membagikan foto. Buka lewat Safari atau Chrome.';
+
+    /* The steps are on screen every time, not hidden behind a help link. The
+       paste is the one part of the whole app that cannot be automated — the
+       caption box belongs to WhatsApp — so it has to be the most obvious thing
+       on the screen rather than something the crew are expected to remember. */
+    var steps = $('send-steps');
+    steps.innerHTML = '';
+    if (sending.mode === 'none') {
+      steps.textContent = 'Browser ini tidak bisa membagikan foto. Buka lewat Chrome (Android) atau Safari (iPhone).';
+    } else {
+      [
+        'Pilih grup WhatsApp',
+        'Tekan lama kolom caption → Tempel',
+        'Kirim'
+      ].forEach(function (text, index) {
+        var row = document.createElement('span');
+        row.className = 'step';
+        var number = document.createElement('b');
+        number.textContent = String(index + 1);
+        row.appendChild(number);
+        row.appendChild(document.createTextNode(text));
+        steps.appendChild(row);
+      });
+    }
+
+    $('send-note').textContent = sending.mode === 'none' ? ''
+      : 'Caption disalin otomatis saat tombol ditekan. 3 foto dikirim sebagai satu album.';
     $('send-status').textContent = '';
     $('send-env').classList.add('hidden');
   }
@@ -1159,19 +1192,21 @@
       return;
     }
 
-    /* Files and caption together when the browser accepts both — that is the
-       output the brief asks for: one message, photos and report. Where it does
-       not, the photos go alone and the caption has to be pasted, which is why
-       Salin Caption is always on screen rather than hidden behind a failure. */
-    var payload = sending.mode === 'text'
-      ? { files: sending.files, text: sending.caption }
-      : { files: sending.files };
+    /* The clipboard first, and deliberately NOT awaited. Waiting on it would
+       spend the tap that authorises the share sheet, and the share would then be
+       refused with NotAllowedError — the failure that looks like everything
+       else. Fired off now, it has resolved long before the operator has finished
+       picking a group. */
+    copyCaption(sending.caption);
 
-    handToShareSheet(payload, 'send-status', 'send-env', function () {
+    /* Photographs only. Adding the caption here is what put the same report
+       under all three of them, three times over — see openSend(). */
+    handToShareSheet({ files: sending.files }, 'send-status', 'send-env', function () {
       var count = sending.files.length;
       WT.db.markSent([sending.record.id], new Date().toISOString())
         .then(function () {
-          $('send-status').textContent = count + ' foto dikirim.';
+          $('send-status').textContent = count +
+            ' foto dikirim. Caption sudah disalin — tempel di kolom caption WhatsApp.';
           refreshCount();
         });
     });
@@ -1180,15 +1215,25 @@
   /**
    * Puts the caption on the clipboard.
    *
-   * WhatsApp does not always keep the text that travels with a set of images,
-   * and when it drops it there is nothing to do but paste. The old execCommand
-   * path is kept because navigator.clipboard is unavailable on plain http and
-   * in a few in-app browsers, which are exactly the places this app has to
-   * survive.
+   * This is not a convenience any more — it is how the caption reaches WhatsApp
+   * at all. The report cannot travel with the photographs (WhatsApp would stamp
+   * it onto each one separately), so it travels here and the operator pastes it
+   * into WhatsApp's own caption box.
+   *
+   * The old execCommand path is kept because navigator.clipboard is unavailable
+   * on plain http and in a few in-app browsers, which are exactly the places
+   * this app has to survive. It runs synchronously, which also makes it safe to
+   * call in the same tap as a share.
+   *
+   * `announce` is false when this runs alongside a share: the status line then
+   * belongs to the share, and two messages fighting over it reads as a fault.
    */
-  $('send-copy').addEventListener('click', function () {
-    var text = state.sending ? state.sending.caption : '';
+  function copyCaption(text, announce) {
     if (!text) return;
+
+    function say(message) {
+      if (announce) $('send-status').textContent = message;
+    }
 
     function fallback() {
       var area = document.createElement('textarea');
@@ -1203,16 +1248,21 @@
       var ok = false;
       try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
       document.body.removeChild(area);
-      $('send-status').textContent = ok ? 'Caption disalin.' : 'Gagal menyalin — salin manual.';
+      say(ok ? 'Caption disalin.' : 'Gagal menyalin — salin manual dari kotak di atas.');
     }
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
+      // Not awaited by the caller: see the share handler.
       navigator.clipboard.writeText(text).then(function () {
-        $('send-status').textContent = 'Caption disalin.';
+        say('Caption disalin.');
       }).catch(fallback);
     } else {
       fallback();
     }
+  }
+
+  $('send-copy').addEventListener('click', function () {
+    copyCaption(state.sending ? state.sending.caption : '', true);
   });
 
   /* ── List ───────────────────────────────────────────────────────────── */

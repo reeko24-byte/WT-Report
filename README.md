@@ -347,24 +347,51 @@ was gone before the app saw the file.
 
 ## Sending to WhatsApp
 
-The button hands the photographs **and** the report to the phone's share sheet in
-one go. You can still edit the text in WhatsApp before pressing send.
+The button hands over **the three photographs and nothing else**. The report goes
+to the **clipboard** in the same tap, and the operator pastes it into WhatsApp's
+own caption box. Three steps, on screen every time:
 
-Whether the receiving app keeps the accompanying text is up to that app and the OS
-version, not something the page can force — so **Salin Caption stays on screen**
-rather than hidden behind a failure. The line under the button says which of the
-two the browser has agreed to:
+> **1** Pilih grup WhatsApp  **2** Tekan lama kolom caption → Tempel  **3** Kirim
+
+### Why the caption is not in the share payload
+
+This looks like the long way round, and it is the only way that produces the
+right message.
+
+Handing WhatsApp three images *and* a caption together does not make one message.
+WhatsApp takes that text and stamps it onto **every image separately**, so the
+group receives the same report three times, once under each photograph, and no
+album at all. That is WhatsApp's behaviour on an `ACTION_SEND_MULTIPLE` intent
+carrying `EXTRA_TEXT`; nothing the page passes can change it, and
+`navigator.canShare()` will happily agree to the payload first.
+
+Handed three plain images with no text, WhatsApp groups them into **one album**
+and offers its own caption field. Pasting the report there gives exactly the
+shape the other crews send: one album, one report underneath.
+
+**It has nothing to do with photo orientation.** A landscape shot among two
+portraits changes nothing — every photograph is normalised to the same long edge
+and re-encoded before it is shared, and WhatsApp albums group regardless of
+shape.
+
+**The clipboard write is deliberately not awaited.** Waiting on it would spend
+the tap that authorises the share sheet, and the share would then be refused with
+`NotAllowedError` — the failure that looks like every other failure. It is fired
+off and the share follows immediately; it has long resolved by the time a group
+has been picked. *Salin Caption Lagi* is there for the rare browser that refuses
+the clipboard.
+
+The line under the button says whether sharing can work here at all:
 
 | It says | Meaning |
 |---|---|
-| *Foto dan caption dikirim bersamaan* | Both are being handed over |
-| *Browser ini hanya mengirim foto* | Photos only — copy the caption first |
-| *Browser ini tidak bisa membagikan foto* | No file sharing here; open in Safari or Chrome |
+| *Caption disalin otomatis…* | Ready — photos share, caption is on the clipboard |
+| *Browser ini tidak bisa membagikan foto* | No file sharing here; open in Chrome or Safari |
 
-Sending is deliberately two taps on the export screen (build, then send). A
-browser withdraws a page's permission to open the share sheet if the button's
-handler waits on anything first, so the file is built on one tap and handed over
-on the next.
+Sending the Excel is deliberately two taps on the export screen (build, then
+send). A browser withdraws a page's permission to open the share sheet if the
+button's handler waits on anything first, so the file is built on one tap and
+handed over on the next.
 
 ### On Android, the Excel file cannot be shared at all
 
@@ -450,6 +477,7 @@ still running under the old one; one reload finishes it.
 |---|---|
 | `v1` | first build |
 | `v2` | `Location` label and aligned colons · Pipeline Walkthrough (South) · `Tim` carries the whole crew · `10/12` merged with `24" & 20"` · watermark outlined and raised to 55% · KP prints `XX + XXX` · assigned stretch (Penugasan) |
+| `v3` | photos share without the caption, so WhatsApp makes one album instead of three captioned messages; caption goes to the clipboard and the paste steps are on screen |
 
 Everything is cached for offline use on first load, `assets/watermark.png`
 included — it is part of the shell, not an extra, because a walk that started

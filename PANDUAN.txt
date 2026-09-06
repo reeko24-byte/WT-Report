@@ -1,0 +1,97 @@
+*PANDUAN APLIKASI WT SURVEILLANCE*
+_Laporan Team WT — foto, caption WhatsApp, dan Excel_
+
+Link aplikasi:
+[ISI LINK DI SINI]
+
+━━━━━━━━━━━━━━━
+
+*1. BROWSER YANG DIPAKAI*
+
+📱 Android → *Chrome*
+🍎 iPhone → *Safari*
+
+Jangan dibuka dari browser di dalam aplikasi lain (misal link yang diklik langsung dari WhatsApp). Kalau terbuka di situ, tekan titik tiga → *Buka di Chrome / Safari*.
+
+━━━━━━━━━━━━━━━
+
+*2. PASANG DI LAYAR UTAMA (sekali saja)*
+
+*Android — Chrome:*
+1. Buka link di atas
+2. Tekan titik tiga (⋮) di kanan atas
+3. Pilih *Install* / *Tambahkan ke Layar Utama*
+4. Tekan *Install*
+
+*iPhone — Safari:*
+1. Buka link di atas
+2. Tekan ikon *Bagikan* (kotak dengan panah ke atas) di bawah layar
+3. Geser ke bawah, pilih *Tambah ke Layar Utama* / _Add to Home Screen_
+4. Tekan *Tambah*
+
+✅ Setelah terpasang, *selalu buka lewat ikon WT di layar utama*, jangan lewat browser lagi.
+
+━━━━━━━━━━━━━━━
+
+*3. SEKALI DI PAGI HARI*
+
+Team → Nama Anda → centang anggota lain (maks 3) → *Lanjut*
+
+Location → Segment → *Penugasan (KP)* → Size Pipe → *Mulai Survey*
+
+💡 Kalau ditugaskan satu segment penuh, cukup tekan tombol *Seluruh segment*.
+
+Team dan penugasan tersimpan seharian. Kalau ganti penugasan, tekan *Ubah*.
+
+━━━━━━━━━━━━━━━
+
+*4. DI SETIAP KP*
+
+1. Ketik *KP* — angka saja, tanda + muncul sendiri
+2. Pilih *Note* (sudah otomatis "Area ROW Terpantau Aman"; tekan *Lainnya* bila ada temuan)
+3. Ambil *3 foto*
+4. Tekan *Simpan & Kirim*
+5. Periksa captionnya, lalu tekan *Kirim ke WhatsApp*
+6. Di WhatsApp:
+   • Pilih grup
+   • *Tekan lama kolom caption → Tempel*
+   • Tekan Kirim
+7. Tekan *KP Berikutnya*
+
+📋 Caption sudah otomatis tersalin saat menekan *Kirim ke WhatsApp*, jadi tinggal Tempel. Kalau tidak ikut tersalin, tekan *Salin Caption Lagi*.
+
+✅ Dengan cara ini 3 foto masuk jadi *satu album* dengan *satu caption* — bukan 3 pesan terpisah.
+
+⚠️ Isi KP dan Note *sebelum* ambil foto. Tulisan di foto dibuat saat foto diambil dan tidak bisa diperbaiki setelahnya.
+
+━━━━━━━━━━━━━━━
+
+*5. AKHIR SURVEI — JANGAN SAMPAI TERLEWAT*
+
+Setiap selesai survei (kurang lebih setiap *20 lokasi*), kirim laporan Excel ke grup:
+
+*Export ke Excel* → *Buat File Excel*
+
+*📱 ANDROID (PENTING):*
+Chrome *tidak bisa* mengirim file Excel langsung — itu batasan Chrome, bukan aplikasinya rusak.
+
+Caranya:
+1. Tekan *Simpan ke Files* (file masuk ke folder *Download*)
+2. Buka WhatsApp → grup
+3. Tekan *Lampirkan* (📎) → *Dokumen*
+4. Pilih file *WT_...xlsx* dari folder Download
+
+*🍎 iPhone:*
+Bisa langsung tekan *Kirim File ke WhatsApp*.
+
+━━━━━━━━━━━━━━━
+
+*CATATAN PENTING*
+
+• Aplikasi tetap jalan *tanpa sinyal*. Foto dan data tersimpan di HP.
+• Foto tetap bisa diambil walau GPS belum terkunci. Yang jadi acuan laporan adalah KP.
+• Excel hanya berisi data yang *belum pernah* diexport, jadi tidak akan dobel.
+• *Jangan* tekan "Hapus data yang sudah diexport" sebelum file Excel benar-benar terkirim ke grup.
+• Kalau ada pembaruan aplikasi, buka aplikasi saat ada sinyal supaya ikut ter-update.
+
+Ada kendala? Kirim screenshot layarnya ke grup.

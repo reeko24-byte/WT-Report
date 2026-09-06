@@ -350,6 +350,33 @@ textarea { min-height: 72px; resize: vertical; }
   user-select: text;
 }
 
+/* ── The steps that happen inside WhatsApp ───────────────────────────── */
+
+/* Numbered, spaced out and above the button rather than under it: the paste is
+   the one action the app cannot perform for the crew, and it is read while
+   standing on a right-of-way in the sun. */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0 4px;
+  font-size: 15px;
+  color: var(--ink);
+}
+.steps .step { display: flex; align-items: center; gap: 10px; }
+.steps .step b {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--blue-bright);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 24px;
+}
+
 /* ── Buttons ─────────────────────────────────────────────────────────── */
 
 button {

@@ -14,7 +14,7 @@
    new worker that re-caches everything else. Upload twenty changed files with
    this line untouched and a phone that already has the app keeps serving the
    old ones, silently, for as long as it is installed. */
-var CACHE_VERSION = 'wt-surveillance-v2';
+var CACHE_VERSION = 'wt-surveillance-v3';
 
 /* Relative paths throughout, so the app works from a project subdirectory on
    GitHub Pages as well as from a domain root. */
