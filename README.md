@@ -347,46 +347,47 @@ was gone before the app saw the file.
 
 ## Sending to WhatsApp
 
-The button hands over **the three photographs and nothing else**. The report goes
-to the **clipboard** in the same tap, and the operator pastes it into WhatsApp's
-own caption box. Three steps, on screen every time:
+The button hands the photographs **and** the report to the phone's share sheet in
+one go — one tap, nothing to paste. This is `navigator.share({ files, text })`,
+character for character the same call ROWPowerline makes, and it must stay the
+default.
 
-> **1** Pilih grup WhatsApp  **2** Tekan lama kolom caption → Tempel  **3** Kirim
+Only where the browser refuses the pair do the photographs go alone. The caption
+is then put on the clipboard inside the same tap and the send screen shows the
+three steps for pasting it. **That is a fallback and must never become the normal
+route** — an extra step on every KP, twenty times a day, is not a fix.
 
-### Why the caption is not in the share payload
-
-This looks like the long way round, and it is the only way that produces the
-right message.
-
-Handing WhatsApp three images *and* a caption together does not make one message.
-WhatsApp takes that text and stamps it onto **every image separately**, so the
-group receives the same report three times, once under each photograph, and no
-album at all. That is WhatsApp's behaviour on an `ACTION_SEND_MULTIPLE` intent
-carrying `EXTRA_TEXT`; nothing the page passes can change it, and
-`navigator.canShare()` will happily agree to the payload first.
-
-Handed three plain images with no text, WhatsApp groups them into **one album**
-and offers its own caption field. Pasting the report there gives exactly the
-shape the other crews send: one album, one report underneath.
-
-**It has nothing to do with photo orientation.** A landscape shot among two
-portraits changes nothing — every photograph is normalised to the same long edge
-and re-encoded before it is shared, and WhatsApp albums group regardless of
-shape.
-
-**The clipboard write is deliberately not awaited.** Waiting on it would spend
-the tap that authorises the share sheet, and the share would then be refused with
-`NotAllowedError` — the failure that looks like every other failure. It is fired
-off and the share follows immediately; it has long resolved by the time a group
-has been picked. *Salin Caption Lagi* is there for the rare browser that refuses
-the clipboard.
-
-The line under the button says whether sharing can work here at all:
-
-| It says | Meaning |
+| The line under the button says | Meaning |
 |---|---|
-| *Caption disalin otomatis…* | Ready — photos share, caption is on the clipboard |
+| *Foto dan caption dikirim bersamaan* | Both handed over — nothing to do |
+| *Browser ini hanya mengirim foto* | Photos only; caption is on the clipboard, paste it |
 | *Browser ini tidak bisa membagikan foto* | No file sharing here; open in Chrome or Safari |
+
+### If the caption arrives three times, once under each photograph
+
+**Settled on 2026-09-06: this is a change outside the app.** A crew phone sent
+three photographs and one caption as a single WhatsApp album on 31 August 2026,
+from this exact call. Six days later the same call, from both this app and
+ROWPowerline, put the caption under each photograph separately on Billy's phone.
+Neither app changed in between, and it is not the photo count (the August album
+had three) and not orientation (every photograph is normalised before sharing).
+WhatsApp or Chrome changed how a shared caption is applied to several images.
+
+Which of the two, and how widely it has spread, is **not known** — it cannot be
+read off the phone, and the August evidence comes from a different handset than
+the September evidence. So the app does not guess. It keeps the one-tap share as
+the default and gives the affected phone a switch.
+
+**Per phone, remembered, and worded as the symptom:** the send screen carries
+*"Caption muncul 3x di grup? Ganti cara kirim"*. Tapping it moves that phone to
+photographs-only plus a pasted caption, and the three steps appear. Tapping it
+again moves back. Nothing changes for a phone that still sends correctly, which
+is the point — the fleet is mixed, and an extra step imposed on everybody to fix
+some phones is the wrong trade.
+
+**The paste must never become the default.** It was tried on 2026-09-06 as the
+app-wide behaviour and rejected within the hour: an extra step on an action
+performed twenty times a day is not a fix, however much better the message looks.
 
 Sending the Excel is deliberately two taps on the export screen (build, then
 send). A browser withdraws a page's permission to open the share sheet if the
@@ -477,7 +478,9 @@ still running under the old one; one reload finishes it.
 |---|---|
 | `v1` | first build |
 | `v2` | `Location` label and aligned colons · Pipeline Walkthrough (South) · `Tim` carries the whole crew · `10/12` merged with `24" & 20"` · watermark outlined and raised to 55% · KP prints `XX + XXX` · assigned stretch (Penugasan) |
-| `v3` | photos share without the caption, so WhatsApp makes one album instead of three captioned messages; caption goes to the clipboard and the paste steps are on screen |
+| `v3` | *withdrawn* — dropped the caption from the share payload and asked for a paste. Correct output, but an extra step on every KP; rejected |
+| `v4` | caption travels with the photographs again, as ROWPowerline does; the paste steps show only when the browser refuses the pair |
+| `v5` | per-phone switch on the send screen for phones where WhatsApp has started stamping the caption onto each photograph |
 
 Everything is cached for offline use on first load, `assets/watermark.png`
 included — it is part of the shell, not an extra, because a walk that started

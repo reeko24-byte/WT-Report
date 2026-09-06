@@ -51,16 +51,10 @@ Team dan penugasan tersimpan seharian. Kalau ganti penugasan, tekan *Ubah*.
 2. Pilih *Note* (sudah otomatis "Area ROW Terpantau Aman"; tekan *Lainnya* bila ada temuan)
 3. Ambil *3 foto*
 4. Tekan *Simpan & Kirim*
-5. Periksa captionnya, lalu tekan *Kirim ke WhatsApp*
-6. Di WhatsApp:
-   • Pilih grup
-   • *Tekan lama kolom caption → Tempel*
-   • Tekan Kirim
-7. Tekan *KP Berikutnya*
+5. Periksa captionnya, lalu tekan *Kirim ke WhatsApp* → pilih grup → Kirim
+6. Tekan *KP Berikutnya*
 
-📋 Caption sudah otomatis tersalin saat menekan *Kirim ke WhatsApp*, jadi tinggal Tempel. Kalau tidak ikut tersalin, tekan *Salin Caption Lagi*.
-
-✅ Dengan cara ini 3 foto masuk jadi *satu album* dengan *satu caption* — bukan 3 pesan terpisah.
+📋 Foto dan caption terkirim bersamaan. Kalau di HP tertentu captionnya tidak ikut, tekan *Salin Caption* lalu tempel di kolom caption WhatsApp.
 
 ⚠️ Isi KP dan Note *sebelum* ambil foto. Tulisan di foto dibuat saat foto diambil dan tidak bisa diperbaiki setelahnya.
 
